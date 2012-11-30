@@ -1,0 +1,10 @@
+*.swp
+*.swo
+.kemumakirc
+tests-enabled/**/*
+images/**/*
+tmp/**/*
+builders/*/copy.txt
+config/kemumaki.conf
+config/vms/dcmgr.vm
+config/vms/hva.vm

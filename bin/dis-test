@@ -1,0 +1,7 @@
+#!/bin/bash
+
+name=${1}
+base_dir=$(cd $(dirname $0)/../ && pwd)
+
+[[ -n ${1} ]] || return 0
+rm ${base_dir}/tests-enabled/${name}

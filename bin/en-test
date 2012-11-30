@@ -1,0 +1,9 @@
+#!/bin/bash
+
+name=${1}
+base_dir=$(cd $(dirname $0)/../ && pwd)
+
+[[ -n ${name} ]] || exit 0
+[[ -d ${base_dir}/tests-available/${name} ]] || { echo "[ERROR] Directory ${name} not exists in ${base_dir}/tests-available"; exit 1; }
+
+ln -sf ${base_dir}/tests-available/${name} ${base_dir}/tests-enabled/
