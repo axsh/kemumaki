@@ -48,7 +48,6 @@ function each_vm(){
   for f in ${function_names[*]}; do
     for name in ${vm_names[*]}; do
       load_config
-      . ${vm_config_dir}/${name}.vm
       $f $name
     done
   done
@@ -71,6 +70,7 @@ function build_vm(){
   local rawfile=${image_dir}/${name}.raw
 
   check_vm ${name} || return 1
+  . ${vm_config_dir}/${name}.vm
 
   echo "build_vm ${name}"
 
@@ -94,6 +94,7 @@ function start_vm(){
   local image_path=${image_dir}/${name}.raw
 
   check_vm ${name} || return 1
+  . ${vm_config_dir}/${name}.vm
 
   echo "start_vm ${name}"
   
@@ -110,6 +111,7 @@ function start_vm(){
 function stop_vm(){
   local name=$1 vifname=${name}
   check_vm ${name} || return 1
+  . ${vm_config_dir}/${name}.vm
 
   echo "stop_vm ${name}"
 
@@ -136,7 +138,7 @@ base_dir=$(cd $(dirname $0)/..; pwd)
 
 command=${1}
 script_dir=${base_dir}/scripts
-config_dir=${base_dir}/config
+config_dir=${KEMUMAKI_CONFIG_DIR:-${base_dir}/config}
 vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${base_dir}/builders
 image_dir=${base_dir}/images
@@ -184,7 +186,7 @@ case ${command} in
     run "report"
     ;;
   *)
-    each_vm "stop_vm" "build_vm" "start_vm"
+    each_vm stop_vm build_vm start_vm
     run "test"
     run "report"
     ;;
