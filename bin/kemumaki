@@ -6,6 +6,11 @@ function vmbuilder_path(){
   which vmbuilder.sh
 }
 
+function prepare(){
+  mkdir -p ${image_dir}
+  mkdir -p ${tmp_dir}
+}
+
 function load_config(){
   . ${config_dir}/kemumaki.conf
 }
@@ -24,7 +29,6 @@ EOS
 function generate_hosts(){
   local hostname=$1
   [[ -n "${hostname}" ]] || { echo "[ERROR] Invalid argument: hostname:${hostname}" >&2; return 1; }
-  mkdir -p ${tmp_dir}
   cat <<EOS > ${tmp_dir}/hosts
 127.0.0.1 localhost
 127.0.0.1 ${hostname}
@@ -156,6 +160,7 @@ vm_names=($(find ${vm_config_dir} -type f -name "*.vm" -exec basename {} \; | se
 
 checkroot
 load_config
+prepare
 
 case ${command} in
   build_vm)
