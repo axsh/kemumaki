@@ -2,10 +2,6 @@
 
 set -e
 
-function vmbuilder_path(){
-  which vmbuilder.sh
-}
-
 function prepare(){
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
@@ -68,13 +64,13 @@ function check_vm(){
 
 function build_vm(){
   local name=$1
+  . ${vm_config_dir}/${name}.vm
   local vm_dir=${vmbuilder_data_dir}/${vm_type}
   local copy=${vm_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
   local rawfile=${image_dir}/${name}.raw
 
   check_vm ${name} || return 1
-  . ${vm_config_dir}/${name}.vm
 
   echo "build_vm ${name}"
 
@@ -95,10 +91,10 @@ function build_vm(){
 
 function start_vm(){
   local name=$1
+  . ${vm_config_dir}/${name}.vm
   local image_path=${image_dir}/${name}.raw
 
   check_vm ${name} || return 1
-  . ${vm_config_dir}/${name}.vm
 
   echo "start_vm ${name}"
   
@@ -113,9 +109,10 @@ function start_vm(){
 }
 
 function stop_vm(){
-  local name=$1 vifname=${name}
-  check_vm ${name} || return 1
+  local name=$1
   . ${vm_config_dir}/${name}.vm
+  local vifname=${name}
+  check_vm ${name} || return 1
 
   echo "stop_vm ${name}"
 
@@ -147,9 +144,9 @@ vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${base_dir}/builders
 image_dir=${base_dir}/images
 tmp_dir=${base_dir}/tmp
-vmbuilder_dir=$(dirname $(vmbuilder_path))
-vmbuilder_command=${vmbuilder_dir}/vmbuilder.sh
-kvm_ctl_command=${vmbuilder_dir}/misc/kvm-ctl.sh
+vmbuilder_dir=${base_dir}/vmbuilder
+vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
+kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
 vnc_port=${vnc_port:-1001}
 monitor_port=${monitor_port:-4444}
 serial_port=${serial_port:-5555}
@@ -167,32 +164,32 @@ case ${command} in
     if [[ -n "${2}" ]]; then
       build_vm $2
     else
-      each_vm "build_vm"
+      each_vm build_vm
     fi
     ;;
   start_vm)
     if [[ -n "${2}" ]]; then
       start_vm $2
     else
-      each_vm "start_vm"
+      each_vm start_vm
     fi
     ;;
   stop_vm)
     if [[ -n "${2}" ]]; then
       stop_vm $2
     else
-      each_vm "stop_vm"
+      each_vm stop_vm
     fi
     ;;
   test)
-    run "test"
+    run test
     ;;
   report)
-    run "report"
+    run report
     ;;
   *)
     each_vm stop_vm build_vm start_vm
-    run "test"
-    run "report"
+    run test
+    run report
     ;;
 esac

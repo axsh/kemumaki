@@ -16,9 +16,6 @@ Quick Start
     $ cd /opt/caquino
     $ sudo git://github.com/caquino/redis-bash.git
     $
-    $ # configure environment variables
-    $ cp .kemumakirc.example .kemumakirc
-    $
     $ # configure global settings
     $ cp config/kemumaki.conf.example config/kemumaki.conf
     $ vi config/kemumaki.conf
@@ -30,5 +27,5 @@ Quick Start
     $ vi config/vms/hva.vm
     $ 
     $ # run all
-    $ sudo bin/kemumaki.sh
+    $ sudo bin/kemumaki
 

@@ -1,8 +1,7 @@
 #!/bin/bash 
 
 base_dir=$(cd $(dirname $0)/.. && pwd)
-[[ -f ${base_dir}/.kemumakirc ]] && . ${base_dir}/.kemumakirc || :
-REDIS_BASH_DIR=$(dirname $(which redis-bash-cli))
+REDIS_BASH_DIR=${base_dir}/redis-bash
 source ${REDIS_BASH_DIR}/redis-bash-lib 2> /dev/null
 
 REDISHOST=localhost
