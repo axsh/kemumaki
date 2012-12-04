@@ -1,9 +1,9 @@
 *.swp
 *.swo
 .kemumakirc
-tests-enabled/**/*
-images/**/*
-tmp/**/*
+tests-enabled/*
+images/*
+tmp/*
 builders/*/copy.txt
 config/kemumaki.conf
 config/vms/dcmgr.vm
