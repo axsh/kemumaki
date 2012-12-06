@@ -99,8 +99,8 @@ function start_vm(){
   echo "start_vm ${name}"
   
   ${kvm_ctl_command} start \
+    --name=${name} \
     --image-path=${image_path} \
-    --vif_name=${name} \
     --vnc_port=$((${vnc_port} + ${node_id})) \
     --monitor_port=$((${monitor_port} + ${node_id})) \
     --serial_port=$((${serial_port} + ${node_id}))
