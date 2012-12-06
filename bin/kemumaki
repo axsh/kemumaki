@@ -44,11 +44,43 @@ function checkroot() {
 }
 
 function rpmbuild() {
-  [[ -d ${rpmbuild_script_dir} ]] || { echo "[ERROR] no such directory: ${rpmbuild_script_dir}" >&2; return 1; }
   cd ${rpmbuild_script_dir}
 
+  echo "start rpmbuilding."
   ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh
+}
+
+function setup_local_repo_server() {
+  echo "setup and start local repository server."
+
+  # check if httpd is installed or not.
+  # if not, install httpd
+  ret=$(yum list installed | grep "httpd\.")
+  [[ -z ${ret} ]] && yum -y install httpd || :
+
+  # check the rules of iptables
+  ret=$(iptables -L | grep http | awk '{if($1=="ACCEPT"){print 1}}')
+  [[ -z ${ret} ]] && {
+    # Allow iptables to pass through.
+    iptables -A INPUT -p tcp --dport http -j ACCEPT
+
+    # save the rules
+    service iptables save
+
+    # restart iptables
+    service iptables restart
+  }
+
+  # restart httpd
+  service httpd restart
+}
+
+function stop_local_repo_server() {
+  echo "stop local repository server."
+
+  # stop httpd
+  service httpd stop
 }
 
 function each_vm(){
@@ -152,7 +184,9 @@ vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${base_dir}/builders
 image_dir=${base_dir}/images
 tmp_dir=${base_dir}/tmp
-rpmbuild_script_dir=${base_dir}/rpmbuild/ops
+rpmbuild_dir=${base_dir}/rpmbuild
+rpmbuild_script_dir=${rpmbuild_dir}/ops
+helpers_script_dir=${rpmbuild_dir}/helpers
 vmbuilder_dir=${base_dir}/vmbuilder
 vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
 kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
@@ -170,7 +204,9 @@ prepare
 
 case ${command} in
   rpmbuild)
+    setup_local_repo_server
     rpmbuild
+    stop_local_repo_server
     ;;
   build_vm)
     if [[ -n "${2}" ]]; then
@@ -200,8 +236,11 @@ case ${command} in
     run report
     ;;
   *)
+    setup_local_repo_server
     rpmbuild
-    each_vm stop_vm build_vm start_vm
+    each_vm stop_vm build_vm
+    stop_local_repo_server
+    each start_vm
     run test
     run report
     ;;

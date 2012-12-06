@@ -5,7 +5,6 @@ set -x
 
 . ./config_s3.env
 
-
 [ -d ${rpm_dir} ] || mkdir -p ${rpm_dir}
 
 for arch in ${archs}; do
