@@ -43,6 +43,14 @@ function checkroot() {
   } || :
 }
 
+function rpmbuild() {
+  [[ -d ${rpmbuild_script_dir} ]] || { echo "[ERROR] no such directory: ${rpmbuild_script_dir}" >&2; return 1; }
+  cd ${rpmbuild_script_dir}
+
+  ./setup-ci-env.sh setup_chroot_dir
+  ./spot-build.sh
+}
+
 function each_vm(){
   local function_names=($*)
   for f in ${function_names[*]}; do
@@ -144,6 +152,7 @@ vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${base_dir}/builders
 image_dir=${base_dir}/images
 tmp_dir=${base_dir}/tmp
+rpmbuild_script_dir=${base_dir}/rpmbuild/ops
 vmbuilder_dir=${base_dir}/vmbuilder
 vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
 kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
@@ -160,6 +169,9 @@ load_config
 prepare
 
 case ${command} in
+  rpmbuild)
+    rpmbuild
+    ;;
   build_vm)
     if [[ -n "${2}" ]]; then
       build_vm $2
@@ -188,6 +200,7 @@ case ${command} in
     run report
     ;;
   *)
+    rpmbuild
     each_vm stop_vm build_vm start_vm
     run test
     run report
