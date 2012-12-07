@@ -2,13 +2,24 @@
 
 set -e
 
+function echo_vm_names(){
+  # sort vm names by node_id
+  echo $(find ${vm_config_dir} -type f -name "*.conf" | while read file; do
+    echo "${vm_names} $(basename $file | sed -e 's/\.conf//g'):$(grep ^node_id $file | sed -e 's/^node_id=\([0-9]*\)$/\1/')"
+  done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//')
+}
+
 function prepare(){
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
 }
 
 function load_config(){
-  . ${config_dir}/kemumaki.conf
+  [[ ! -f ${config_dir}/kemumaki.conf ]] || . ${config_dir}/kemumaki.conf
+}
+
+function load_node_config(){
+  [[ ! -f ${vm_config_dir}/${name}.conf ]] || . ${vm_config_dir}/${name}.conf
 }
 
 function generate_copy_file(){
@@ -48,11 +59,9 @@ function each_vm(){
   local function_names=($*)
   for f in ${function_names[*]}; do
     for name in ${vm_names[*]}; do
-      load_config
-      $f $name
+      ($f $name)
     done
   done
-  load_config
 }
 
 function check_vm(){
@@ -65,7 +74,7 @@ function check_vm(){
 
 function build_vm(){
   local name=$1
-  . ${vm_config_dir}/${name}.vm
+  load_node_config $name
   local vm_dir=${vmbuilder_data_dir}/${vm_type}
   local copy=${vm_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
@@ -92,7 +101,7 @@ function build_vm(){
 
 function start_vm(){
   local name=$1
-  . ${vm_config_dir}/${name}.vm
+  load_node_config $name
   local image_path=${image_dir}/${name}.raw
 
   check_vm ${name} || return 1
@@ -111,7 +120,7 @@ function start_vm(){
 
 function stop_vm(){
   local name=$1
-  . ${vm_config_dir}/${name}.vm
+  load_node_config $name
   local vifname=${name}
   check_vm ${name} || return 1
 
@@ -154,7 +163,7 @@ serial_port=${serial_port:-5555}
 brname=${brname:-br0}
 netmask=${netmask:-255.255.255.0}
 dns=${dns:-8.8.8.8}
-vm_names=($(find ${vm_config_dir} -type f -name "*.vm" -exec basename {} \; | sed -e 's/\.vm//g'))
+vm_names=$(echo_vm_names)
 
 checkroot
 load_config

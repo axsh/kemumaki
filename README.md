@@ -21,10 +21,10 @@ Quick Start
     $ vi config/kemumaki.conf
     $
     $ # configure vm settings
-    $ cp config/vms/dcmgr.vm.example config/vms/dcmgr.vm
-    $ vi config/vms/dcmgr.vm
-    $ cp config/vms/hva.vm.example config/vms/hva.vm
-    $ vi config/vms/hva.vm
+    $ cp config/vms/dcmgr.conf.example config/vms/dcmgr.conf
+    $ vi config/vms/dcmgr.conf
+    $ cp config/vms/hva.conf.example config/vms/hva.conf
+    $ vi config/vms/hva.conf
     $ 
     $ # run all
     $ sudo bin/kemumaki
