@@ -15,6 +15,7 @@ function generate_copy_file(){
   local vm_name=$1 vm_type=$2
   [[ -n "${vm_name}" ]] || { echo "[ERROR] Invalid argument: vm_name:${vm_name}" >&2; return 1; }
   [[ -n "${vm_type}" ]] || { echo "[ERROR] Invalid argument: vm_type:${vm_type}" >&2; return 1; }
+  [[ -f "/root/.ssh/id_rsa" ]] || ssh-keygen -N "" -f "/root/.ssh/id_rsa"
   generate_hosts $1
   cat <<EOS > ${vmbuilder_data_dir}/${vm_type}/copy.txt
 /root/.ssh/id_rsa.pub /root/.ssh/id_rsa.pub
