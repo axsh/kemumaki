@@ -7,3 +7,4 @@ tmp/*
 builders/*/copy.txt
 config/kemumaki.conf
 config/vms/*.conf
+centos-*
