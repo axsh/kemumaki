@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 function echo_vm_names(){
   # sort vm names by node_id
