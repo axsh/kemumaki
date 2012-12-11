@@ -1,10 +1,11 @@
 #!/bin/bash
 
 set -e
+set -x
 
 function echo_vm_names(){
   # sort vm names by node_id
-  echo $(find ${vm_config_dir} -type f -name "*.conf" | while read file; do
+  echo $(ls ${vm_config_dir}/*.conf | while read file; do
     echo "${vm_names} $(basename $file | sed -e 's/\.conf//g'):$(grep ^node_id $file | sed -e 's/^node_id=\([0-9]*\)$/\1/')"
   done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//')
 }
@@ -78,6 +79,7 @@ function build_vm(){
   local vm_dir=${vmbuilder_data_dir}/${vm_type}
   local copy=${vm_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
+  # TODO versioning
   local rawfile=${image_dir}/${name}.raw
 
   check_vm ${name} || return 1
@@ -89,14 +91,11 @@ function build_vm(){
   ${vmbuilder_command} \
     --hostname=${name} \
     --rootsize=${rootsize:-8192} \
-    --ip=${ipaddr} \
-    --mask=${netmask} \
-    --net=${network} \
-    --gw=${gateway} \
     --dns=${dns} \
     --copy=${copy} \
     --execscript=${script} \
-    --raw=${rawfile}
+    --raw=${rawfile} \
+    --nictab=${vm_config_dir}/${name}.nic
 }
 
 function start_vm(){
