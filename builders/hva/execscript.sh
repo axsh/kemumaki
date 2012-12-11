@@ -30,28 +30,28 @@ sudo
 "
 yum install -y ${distro_pkgs}
 
-#cd /tmp
-#
-#echo "git clone."
-#[[ -d gist-1108422 ]] || git clone git://gist.github.com/1108422.git gist-1108422
-#cd gist-1108422
-#pwd
-#
-#echo "add work user."
-#./add-work-user.sh
-#
-#echo "change normal user password"
-#eval $(./detect-linux-distribution.sh)
-#devel_user=$(echo ${DISTRIB_ID} | tr A-Z a-z)
-#devel_home=$(getent passwd ${devel_user} 2>/dev/null | awk -F: '{print $6}')
-#
-#echo ${devel_user}:${devel_user} | chpasswd
-#egrep -q ^umask ${devel_home}/.bashrc || {
-#  echo umask 022 >> ${devel_home}/.bashrc
-#}
-#
-#cd /tmp
-#rm -rf gist-1108422
+cd /tmp
+
+echo "git clone."
+[[ -d gist-1108422 ]] || git clone git://gist.github.com/1108422.git gist-1108422
+cd gist-1108422
+pwd
+
+echo "add work user."
+./add-work-user.sh
+
+echo "change normal user password"
+eval $(./detect-linux-distribution.sh)
+devel_user=$(echo ${DISTRIB_ID} | tr A-Z a-z)
+devel_home=$(getent passwd ${devel_user} 2>/dev/null | awk -F: '{print $6}')
+
+echo ${devel_user}:${devel_user} | chpasswd
+egrep -q ^umask ${devel_home}/.bashrc || {
+  echo umask 022 >> ${devel_home}/.bashrc
+}
+
+cd /tmp
+rm -rf gist-1108422
 
 ## configure hva
 
@@ -69,8 +69,9 @@ done
 
 cp -f /opt/axsh/wakame-vdc/dcmgr/config/hva.conf.example /etc/wakame-vdc/hva.conf
 
-# add ifcfg-br0 ifcfg-eth0
-/opt/axsh/wakame-vdc/rpmbuild/helpers/setup-bridge-if.sh --brname=
+## add ifcfg-br0 ifcfg-eth0
+#/opt/axsh/wakame-vdc/rpmbuild/helpers/setup-bridge-if.sh --brname=
+
 # add vzkernel entry
 /opt/axsh/wakame-vdc/rpmbuild/helpers/edit-grub4vz.sh add
 # edit boot order to use vzkernel as default.

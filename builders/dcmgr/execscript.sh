@@ -91,11 +91,11 @@ cp -f /opt/axsh/wakame-vdc/dcmgr/config/convert_specs/load_balancer.yml.example 
 cp -f /opt/axsh/wakame-vdc/frontend/admin/config/admin.yml.example /etc/wakame-vdc/admin/admin.yml
 echo "$(eval "echo \"$(cat /opt/axsh/wakame-vdc/tests/vdc.sh.d/proxy.conf.tmpl)\"")" > /etc/wakame-vdc/proxy.conf
 
-# add ifcfg-br0 ifcfg-eth0
-/opt/axsh/wakame-vdc/rpmbuild/helpers/setup-bridge-if.sh
+## add ifcfg-br0 ifcfg-eth0
+#/opt/axsh/wakame-vdc/rpmbuild/helpers/setup-bridge-if.sh
 
 # data initialization
-echo "vdc_data=/opt/axsh/wakame-vdc /opt/axsh/wakame-vdc/tests/vdc.sh init" >> /etc/rc.local
+#echo "vdc_data=/opt/axsh/wakame-vdc /opt/axsh/wakame-vdc/tests/vdc.sh init" >> /etc/rc.local
 
 # notification
 (cd /opt/axsh; git clone https://github.com/caquino/redis-bash.git)
