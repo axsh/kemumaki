@@ -79,7 +79,7 @@ function build_vm(){
   local copy=${vm_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
   # TODO versioning
-  local rawfile=${image_dir}/${name}.raw
+  local raw=${raw:-${image_dir}/${name}.raw}
 
   check_vm ${name} || return 1
 
@@ -93,8 +93,11 @@ function build_vm(){
     --dns=${dns} \
     --copy=${copy} \
     --execscript=${script} \
-    --raw=${rawfile} \
+    --raw=${raw} \
     --nictab=${vm_config_dir}/${name}.nic
+
+  # cleanup known_hosts
+  [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R "${ipaddr}"
 }
 
 function start_vm(){
@@ -124,8 +127,6 @@ function stop_vm(){
 
   echo "stop_vm ${name}"
 
-  # cleanup known_hosts
-  ssh-keygen -R "${ipaddr}"
   set +e
   ${kvm_ctl_command} stop --monitor_port=$((${monitor_port} + ${node_id}))
   set -e
