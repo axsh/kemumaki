@@ -26,10 +26,8 @@ function generate_copy_file(){
   local vm_name=$1 vm_type=$2
   [[ -n "${vm_name}" ]] || { echo "[ERROR] Invalid argument: vm_name:${vm_name}" >&2; return 1; }
   [[ -n "${vm_type}" ]] || { echo "[ERROR] Invalid argument: vm_type:${vm_type}" >&2; return 1; }
-  [[ -f "/root/.ssh/id_rsa" ]] || ssh-keygen -N "" -f "/root/.ssh/id_rsa"
   generate_hosts $1
   cat <<EOS > ${vmbuilder_data_dir}/${vm_type}/copy.txt
-/root/.ssh/id_rsa.pub /root/.ssh/id_rsa.pub
 ${tmp_dir}/hosts /etc/hosts
 EOS
 }
@@ -79,7 +77,29 @@ function build_vm(){
   local copy=${vm_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
   # TODO versioning
-  local raw=${raw:-${image_dir}/${name}.raw}
+  local raw_file=${raw_file:-${image_dir}/${name}.raw}
+
+  if [ -n "${ssh_key}" ]; then
+    [[ -f "${ssh_key}" ]] || {
+      echo "[ERROR] no such file: ${ssh_key}";
+      return 1
+    }
+  else
+    [[ -f /root/.ssh/id_rsa ]] || ssh-keygen -N "" -f /root/.ssh/id_rsa
+  fi
+  local ssh_key=${ssh_key:-/root/.ssh/id_rsa.pub}
+
+  local kemumaki_user=$(logname)
+  local devel_user=${devel_user:-${kemumaki_user}}
+  if [ -n "${ssh_user_key}" ]; then
+    [[ -f "${ssh_user_key}" ]] || {
+      echo "[ERROR] no such file: ${ssh_user_key}";
+      return 1
+    }
+  else
+    [[ -f /home/${kemumaki_user}/.ssh/id_rsa ]] || ssh-keygen -N "" -f /home/${devel_user}/.ssh/id_rsa
+  fi
+  local ssh_user_key=${ssh_user_key:-/home/${devel_user}/.ssh/id_rsa.pub}
 
   check_vm ${name} || return 1
 
@@ -93,17 +113,22 @@ function build_vm(){
     --dns=${dns} \
     --copy=${copy} \
     --execscript=${script} \
-    --raw=${raw} \
+    --raw=${raw_file} \
+    --ssh-key=${ssh_key} \
+    --ssh-user-key=${ssh_user_key} \
+    --devel-user=${devel_user} \
     --nictab=${vm_config_dir}/${name}.nic
 
   # cleanup known_hosts
   [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R "${ipaddr}"
+
+  return 0
 }
 
 function start_vm(){
   local name=$1
   load_node_config $name
-  local image_path=${image_dir}/${name}.raw
+  local image_path=${raw_file:-${image_dir}/${name}.raw}
 
   check_vm ${name} || return 1
 
@@ -111,6 +136,7 @@ function start_vm(){
   
   ${kvm_ctl_command} start \
     --name=${name} \
+    --drive="file=${file},media=disk,boot=on,index=0,cache=none" \
     --image-path=${image_path} \
     --vnc_port=$((${vnc_port} + ${node_id})) \
     --monitor_port=$((${monitor_port} + ${node_id})) \
