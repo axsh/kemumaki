@@ -1,6 +1,7 @@
 [submodule "vmbuilder"]
 	path = vmbuilder
 	url = git://github.com/hansode/vmbuilder.git
+        ignore = dirty
 [submodule "redis-bash"]
 	path = redis-bash
 	url = git://github.com/caquino/redis-bash.git

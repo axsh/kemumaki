@@ -2,13 +2,24 @@
 
 set -e
 
+function echo_vm_names(){
+  # sort vm names by node_id
+  echo $(ls ${vm_config_dir}/*.conf | while read file; do
+    echo "${vm_names} $(basename $file | sed -e 's/\.conf//g'):$(grep ^node_id $file | sed -e 's/^node_id=\([0-9]*\)$/\1/')"
+  done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//')
+}
+
 function prepare(){
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
 }
 
 function load_config(){
-  . ${config_dir}/kemumaki.conf
+  [[ ! -f ${config_dir}/kemumaki.conf ]] || . ${config_dir}/kemumaki.conf
+}
+
+function load_node_config(){
+  [[ ! -f ${vm_config_dir}/${name}.conf ]] || . ${vm_config_dir}/${name}.conf
 }
 
 function generate_copy_file(){
@@ -17,7 +28,6 @@ function generate_copy_file(){
   [[ -n "${vm_type}" ]] || { echo "[ERROR] Invalid argument: vm_type:${vm_type}" >&2; return 1; }
   generate_hosts $1
   cat <<EOS > ${vmbuilder_data_dir}/${vm_type}/copy.txt
-/root/.ssh/id_rsa.pub /root/.ssh/id_rsa.pub
 ${tmp_dir}/hosts /etc/hosts
 EOS
 }
@@ -55,11 +65,9 @@ function each_vm(){
   local function_names=($*)
   for f in ${function_names[*]}; do
     for name in ${vm_names[*]}; do
-      load_config
-      $f $name
+      ($f $name)
     done
   done
-  load_config
 }
 
 function check_vm(){
@@ -72,11 +80,12 @@ function check_vm(){
 
 function build_vm(){
   local name=$1
-  . ${vm_config_dir}/${name}.vm
+  load_node_config $name
   local vm_dir=${vmbuilder_data_dir}/${vm_type}
   local copy=${vm_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
-  local rawfile=${image_dir}/${name}.raw
+  # TODO versioning
+  local raw_file=${raw_file:-${image_dir}/${name}.raw}
 
   check_vm ${name} || return 1
 
@@ -87,28 +96,34 @@ function build_vm(){
   ${vmbuilder_command} \
     --hostname=${name} \
     --rootsize=${rootsize:-8192} \
-    --ip=${ipaddr} \
-    --mask=${netmask} \
-    --net=${network} \
-    --gw=${gateway} \
     --dns=${dns} \
     --copy=${copy} \
     --execscript=${script} \
-    --raw=${rawfile}
+    --raw=${raw_file} \
+    --ssh-key=${ssh_key} \
+    --ssh-user-key=${ssh_user_key} \
+    --devel-user=${devel_user} \
+    --nictab=${vm_config_dir}/${name}.nic
+
+  # cleanup known_hosts
+  [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R "${ipaddr}"
+
+  return 0
 }
 
 function start_vm(){
   local name=$1
-  . ${vm_config_dir}/${name}.vm
-  local image_path=${image_dir}/${name}.raw
+  load_node_config $name
+  local image_path=${raw_file:-${image_dir}/${name}.raw}
 
   check_vm ${name} || return 1
 
   echo "start_vm ${name}"
   
-  sudo ${kvm_ctl_command} start \
+  ${kvm_ctl_command} start \
+    --name=${name} \
+    --drive="file=${file},media=disk,boot=on,index=0,cache=none" \
     --image-path=${image_path} \
-    --vif_name=${name} \
     --vnc_port=$((${vnc_port} + ${node_id})) \
     --monitor_port=$((${monitor_port} + ${node_id})) \
     --serial_port=$((${serial_port} + ${node_id}))
@@ -118,14 +133,12 @@ function start_vm(){
 
 function stop_vm(){
   local name=$1
-  . ${vm_config_dir}/${name}.vm
+  load_node_config $name
   local vifname=${name}
   check_vm ${name} || return 1
 
   echo "stop_vm ${name}"
 
-  # cleanup known_hosts
-  ssh-keygen -R "${ipaddr}"
   set +e
   ${kvm_ctl_command} stop --monitor_port=$((${monitor_port} + ${node_id}))
   set -e
@@ -165,7 +178,7 @@ serial_port=${serial_port:-5555}
 brname=${brname:-br0}
 netmask=${netmask:-255.255.255.0}
 dns=${dns:-8.8.8.8}
-vm_names=($(find ${vm_config_dir} -type f -name "*.vm" -exec basename {} \; | sed -e 's/\.vm//g'))
+vm_names=$(echo_vm_names)
 
 checkroot
 load_config

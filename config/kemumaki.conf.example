@@ -1,7 +1,6 @@
 redis_host=192.168.2.30
 amqp_host=192.168.2.151
 
-brname=br0
-gateway=192.168.2.1
-network=192.168.2.0
-netmask=255.255.255.0
+devel_user=wakame
+ssh_key=/root/.ssh/id_rsa.pub
+ssh_user_key=${HOME}/.ssh/id_rsa.pub

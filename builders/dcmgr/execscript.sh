@@ -31,28 +31,6 @@ distro_pkgs="
 "
 yum install -y ${distro_pkgs}
 
-cd /tmp
-
-echo "git clone."
-[[ -d gist-1108422 ]] || git clone git://gist.github.com/1108422.git gist-1108422
-cd gist-1108422
-pwd
-
-echo "add work user."
-./add-work-user.sh
-
-echo "change normal user password"
-eval $(./detect-linux-distribution.sh)
-devel_user=$(echo ${DISTRIB_ID} | tr A-Z a-z)
-devel_home=$(getent passwd ${devel_user} 2>/dev/null | awk -F: '{print $6}')
-
-echo ${devel_user}:${devel_user} | chpasswd
-egrep -q ^umask ${devel_home}/.bashrc || {
-  echo umask 022 >> ${devel_home}/.bashrc
-}
-
-cd /tmp
-rm -rf gist-1108422
 
 ## configure wakame-vdc
 
@@ -91,19 +69,12 @@ cp -f /opt/axsh/wakame-vdc/dcmgr/config/convert_specs/load_balancer.yml.example 
 cp -f /opt/axsh/wakame-vdc/frontend/admin/config/admin.yml.example /etc/wakame-vdc/admin/admin.yml
 echo "$(eval "echo \"$(cat /opt/axsh/wakame-vdc/tests/vdc.sh.d/proxy.conf.tmpl)\"")" > /etc/wakame-vdc/proxy.conf
 
-# add ifcfg-br0 ifcfg-eth0
-/opt/axsh/wakame-vdc/rpmbuild/helpers/setup-bridge-if.sh
-
 # data initialization
-echo "vdc_data=/opt/axsh/wakame-vdc /opt/axsh/wakame-vdc/tests/vdc.sh init" >> /etc/rc.local
+#echo "vdc_data=/opt/axsh/wakame-vdc /opt/axsh/wakame-vdc/tests/vdc.sh init" >> /etc/rc.local
 
 # notification
 (cd /opt/axsh; git clone https://github.com/caquino/redis-bash.git)
 echo "/opt/axsh/redis-bash/redis-bash-cli -h redis-server publish \$(hostname) ready" >> /etc/rc.local
-
-# ssh login without password
-cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
 
 # change proxy path
 # TODO prepare webdav server for vdc-proxy

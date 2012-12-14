@@ -41,8 +41,8 @@ time REPO_URI=$(cd ${vdc_repo_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./r
 [[ -d ${rpm_dir} ]] &&  mkdir -p ${rpm_dir} || :
 time ./createrepo-vdc.sh
 
-[[ -d ${release_id} ]] && rm -rf ${release_id} || :
-rsync -avx ${rpm_dir} ${release_id}
-
-tar zcvpf ${release_id}.tar.gz ${release_id}
-ls -la ${release_id}.tar.gz
+#[[ -d ${release_id} ]] && rm -rf ${release_id} || :
+#rsync -avx ${rpm_dir} ${release_id}
+#
+#tar zcvpf ${release_id}.tar.gz ${release_id}
+#ls -la ${release_id}.tar.gz
