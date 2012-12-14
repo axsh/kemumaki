@@ -10,7 +10,7 @@ basearchs="${basearchs} noarch"
 
 release_id=$(
   for basearch in ${basearchs}; do
-    for i in pool/vdc/current/${basearch}/wakame*.rpm; do
+    for i in ${rpm_dir}/${basearch}/wakame*.rpm; do
       file=$(basename $i)
       prefix=${file%%.el6.*.rpm}
       echo ${prefix##*-}

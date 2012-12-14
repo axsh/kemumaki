@@ -7,9 +7,9 @@ ARCH_64 := x86_64
 ARCH_32 := i686
 ARCHS   := $(ARCH_64) $(ARCH_32)
 
-BUILD_ID    ?= $$(git log -n 1 --pretty=format:"%h")
-REPO_URI    ?= git://github.com/axsh/wakame-vdc.git
-RPMBUILD_SH ?= ./rpmbuild.sh
+VDC_BUILD_ID ?= $$(git log -n 1 --pretty=format:"%h")
+REPO_URI     ?= git://github.com/axsh/wakame-vdc.git
+RPMBUILD_SH  ?= ./rpmbuild.sh
 
 
 #
@@ -24,7 +24,7 @@ clean: rpm-clean vmapp-clean
 
 dump-vers:
 	@echo ARCHS="\"$(ARCHS)\""
-	@echo BUILD_ID="\"$(BUILD_ID)\""
+	@echo VDC_BUILD_ID="\"$(VDC_BUILD_ID)\""
 	@echo REPO_URI="\"$(REPO_URI)\""
 	@echo RPMBUILD_SH="\"$(RPMBUILD_SH)\""
 
@@ -44,11 +44,11 @@ rpm-clean:
 
 rpm-32: rpm-32-stamp
 rpm-32-stamp:
-	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_32) --build-id=$(BUILD_ID) --repo-uri=$(REPO_URI)
+	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_32) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI)
 	touch $@
 rpm-64: rpm-64-stamp
 rpm-64-stamp:
-	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_64) --build-id=$(BUILD_ID) --repo-uri=$(REPO_URI)
+	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_64) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI)
 	touch $@
 
 #
@@ -63,11 +63,11 @@ vmapp-clean:
 
 vmapp-32: vmapp-32-stamp
 vmapp-32-stamp:
-	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_32) --build-id=$(BUILD_ID) --repo-uri=$(REPO_URI) --execscript=./execscript.d/vmapp-rhel.sh
+	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_32) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI) --execscript=./execscript.d/vmapp-rhel.sh
 	touch $@
 vmapp-64: vmapp-64-stamp
 vmapp-64-stamp:
-	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_64) --build-id=$(BUILD_ID) --repo-uri=$(REPO_URI) --execscript=./execscript.d/vmapp-rhel.sh
+	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_64) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI) --execscript=./execscript.d/vmapp-rhel.sh
 	touch $@
 
 

@@ -48,39 +48,7 @@ function rpmbuild() {
 
   echo "start rpmbuilding."
   ./setup-ci-env.sh setup_chroot_dir
-  ./spot-build.sh
-}
-
-function setup_local_repo_server() {
-  echo "setup and start local repository server."
-
-  # check if httpd is installed or not.
-  # if not, install httpd
-  ret=$(yum list installed | grep "httpd\.")
-  [[ -z ${ret} ]] && yum -y install httpd || :
-
-  # check the rules of iptables
-  ret=$(iptables -L | grep http | awk '{if($1=="ACCEPT"){print 1}}')
-  [[ -z ${ret} ]] && {
-    # Allow iptables to pass through.
-    iptables -A INPUT -p tcp --dport http -j ACCEPT
-
-    # save the rules
-    service iptables save
-
-    # restart iptables
-    service iptables restart
-  }
-
-  # restart httpd
-  service httpd restart
-}
-
-function stop_local_repo_server() {
-  echo "stop local repository server."
-
-  # stop httpd
-  service httpd stop
+  ./spot-build.sh ${vdc_repo_dir}
 }
 
 function each_vm(){
@@ -180,6 +148,7 @@ base_dir=$(cd $(dirname $0)/..; pwd)
 command=${1}
 script_dir=${base_dir}/scripts
 config_dir=${KEMUMAKI_CONFIG_DIR:-${base_dir}/config}
+vdc_repo_dir=${VDC_REPO_DIR:-${base_dir}/wakame-vdc}
 vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${base_dir}/builders
 image_dir=${base_dir}/images
@@ -204,9 +173,9 @@ prepare
 
 case ${command} in
   rpmbuild)
-    setup_local_repo_server
+    #setup_local_repo_server
     rpmbuild
-    stop_local_repo_server
+    #stop_local_repo_server
     ;;
   build_vm)
     if [[ -n "${2}" ]]; then
@@ -236,9 +205,7 @@ case ${command} in
     run report
     ;;
   *)
-    setup_local_repo_server
     rpmbuild
-    each_vm stop_vm build_vm
     stop_local_repo_server
     each start_vm
     run test

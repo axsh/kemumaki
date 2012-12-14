@@ -60,7 +60,7 @@ base_chroot_dir=${tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${ba
 dest_chroot_dir=${tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
 [ -d ${base_chroot_dir} ] || {
-  ${tmp_dir}/vmbuilder/kvm/rhel/6/build-rootfs-tree.sh \
+  ${tmp_dir}/vmbuilder/kvm/rhel/6/cebootstrap.sh \
    --distro_name=${base_distro} \
    --distro_ver=${base_distro_number} \
    --distro_arch=${base_distro_arch} \
@@ -85,7 +85,7 @@ file:///*|/*)
   local_path=${repo_uri##file://}
   [ -d ${local_path} ] && {
     [ -d ${dest_chroot_dir}/${local_path} ] || mkdir -p ${dest_chroot_dir}/${local_path}
-    rsync -avx ${local_path} ${dest_chroot_dir}/${local_path}
+    rsync -avx ${local_path}/ ${dest_chroot_dir}/${local_path}
   }
   ;;
 *)

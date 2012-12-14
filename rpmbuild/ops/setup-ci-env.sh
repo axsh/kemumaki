@@ -6,14 +6,14 @@ set -x
 LANG=C
 LC_ALL=C
 
-abs_path=$(cd $(dirname $0) && pwd)
+abs_dirname=$(cd $(dirname $0) && pwd)
 
 function update_repo() {
   git pull
 }
 
 function setup_chroot_dir() {
-  cd ${abs_path}/../../
+  cd ${abs_dirname}/../../
   [ -d tmp/vmapp_builder/chroot/base ] || mkdir -p tmp/vmapp_builder/chroot/base/
   cd   tmp/vmapp_builder/chroot/base
 
@@ -28,8 +28,8 @@ function setup_chroot_dir() {
   archs="i686 x86_64"
   for arch in ${archs}; do
     [ -f ${distro_detail}_${arch}.tar.gz ] || curl -R -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_detail}_${arch}.tar.gz
-    [ -d ${distro_detail}_${arch}        ] || sudo tar zxvpf ${distro_detail}_${arch}.tar.gz
-    [ -d ${distro}_${arch}               ] || sudo mv ${distro_detail}_${arch} ${distro}_${arch}
+    [ -d ${distro_detail}_${arch}        ] || tar zxpf ${distro_detail}_${arch}.tar.gz
+    [ -d ${distro}_${arch}               ] || mv ${distro_detail}_${arch} ${distro}_${arch}
   done
 }
 
