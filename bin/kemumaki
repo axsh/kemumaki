@@ -2,9 +2,9 @@
 
 set -e
 
-function echo_vm_names(){
+function vm_names(){
   # sort vm names by node_id
-  echo $(ls ${vm_config_dir}/*.conf | while read file; do
+  echo $(find ${vm_config_dir} -maxdepth 1 -name '*.conf' | while read file; do
     echo "${vm_names} $(basename $file | sed -e 's/\.conf//g'):$(grep ^node_id $file | sed -e 's/^node_id=\([0-9]*\)$/\1/')"
   done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//')
 }
@@ -178,7 +178,7 @@ serial_port=${serial_port:-5555}
 brname=${brname:-br0}
 netmask=${netmask:-255.255.255.0}
 dns=${dns:-8.8.8.8}
-vm_names=$(echo_vm_names)
+vm_names=$(vm_names)
 
 checkroot
 load_config
