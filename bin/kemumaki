@@ -54,11 +54,12 @@ function checkroot() {
 }
 
 function rpmbuild() {
+  local checkout_target=$1
   cd ${rpmbuild_script_dir}
 
   echo "start rpmbuilding."
   ./setup-ci-env.sh setup_chroot_dir
-  ./spot-build.sh ${vdc_repo_dir}
+  ./spot-build.sh ${vdc_repo_dir} ${checkout_target}
 }
 
 function each_vm(){
@@ -186,9 +187,8 @@ prepare
 
 case ${command} in
   rpmbuild)
-    #setup_local_repo_server
-    rpmbuild
-    #stop_local_repo_server
+    shift
+    rpmbuild $1
     ;;
   build_vm)
     if [[ -n "${2}" ]]; then

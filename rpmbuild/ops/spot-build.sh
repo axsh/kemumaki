@@ -15,6 +15,10 @@ vdc_repo_dir=$1
   echo "ERROR: repository not found: ${vdc_repo_dir}" >/dev/stderr
   exit 1
 }
+
+checkout_target=$2
+[[ -n ${checkout_target} ]] && (cd ${vdc_repo_dir} && git checkout ${checkout_target})
+
 vdc_build_id=$(cd ${vdc_repo_dir} && git log -n 1 --pretty=format:"%h")
 
 [[ $UID -ne 0 ]] && {
