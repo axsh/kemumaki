@@ -60,6 +60,7 @@ function generate_copy_file(){
   generate_hosts $1
   cat <<EOS > ${vmbuilder_data_dir}/${vm_type}/copy.txt
 ${tmp_dir}/hosts /etc/hosts
+${config_dir}/wakame-vdc.repo /etc/yum.repos.d/wakame-vdc.repo
 EOS
 }
 

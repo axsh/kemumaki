@@ -14,10 +14,11 @@ cat <<'EOS' | chroot $1 bash -c "cat | bash"
 echo root:root | chpasswd
 
 ## yum repositories
-curl -o /etc/yum.repos.d/wakame-vdc.repo -R https://raw.github.com/axsh/wakame-vdc/master/rpmbuild/wakame-vdc.repo
 curl -o /etc/yum.repos.d/openvz.repo     -R https://raw.github.com/axsh/wakame-vdc/master/rpmbuild/openvz.repo
 yum install -y http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-7.noarch.rpm
 
+yum clean metadata --disablerepo=* --enablerepo=wakame-vdc-rhel6
+yum update  -y --disablerepo=* --enablerepo=wakame-vdc-rhel6
 yum install -y wakame-vdc-hva-openvz-vmapp-config
 
 ## instlall package
