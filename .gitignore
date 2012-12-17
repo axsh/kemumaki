@@ -12,3 +12,4 @@ centos-*
 # rpmbuild
 rpmbuild/tmp
 rpmbuild/*-stamp
+wakame-vdc
