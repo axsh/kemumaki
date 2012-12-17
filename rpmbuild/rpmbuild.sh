@@ -1,10 +1,10 @@
 #!/bin/bash
 # rpm build script
 
-PATH=/bin:/usr/bin:/sbin:/usr/sbin
-
 set -e
-set -x
+#set -x
+
+. ./rpmbuild.conf
 
 args=
 while [ $# -gt 0 ]; do
@@ -30,10 +30,6 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 execscript=${execscript:-}
 cacheback=${cacheback:-1}
 
-root_dir="$( cd "$( dirname "$0" )" && pwd )"
-wakame_dir="${root_dir}/../.."
-tmp_dir="${wakame_dir}/tmp/vmapp_builder"
-
 #arch=${arch:-$(arch)}
 arch=${base_distro_arch}
 case ${arch} in
@@ -48,19 +44,11 @@ esac
 
 [[ -d "$tmp_dir" ]] || mkdir -p "$tmp_dir"
 
-cd ${tmp_dir}
-[ -d vmbuilder ] && {
-  cd vmbuilder
-  git pull
-} || {
-  git clone git://github.com/hansode/vmbuilder.git
-}
-
 base_chroot_dir=${tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
 dest_chroot_dir=${tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
 [ -d ${base_chroot_dir} ] || {
-  ${tmp_dir}/vmbuilder/kvm/rhel/6/cebootstrap.sh \
+  ${vmbuilder_dir}/kvm/rhel/6/cebootstrap.sh \
    --distro_name=${base_distro} \
    --distro_ver=${base_distro_number} \
    --distro_arch=${base_distro_arch} \
@@ -70,7 +58,6 @@ dest_chroot_dir=${tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${ba
   sync
 }
 
-cd ${root_dir}
 [ -d ${dest_chroot_dir} ] && {
   echo already exists: ${dest_chroot_dir} >&2
 } || {

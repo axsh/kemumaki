@@ -3,7 +3,7 @@
 set -e
 #set -x
 
-. ./config_s3.env
+. ./rpmbuild.conf
 
 # add noarch to basearchs
 basearchs="${basearchs} noarch"

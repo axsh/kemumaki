@@ -1,21 +1,17 @@
 #!/bin/bash
 
 set -e
-set -x
+#set -x
 
-LANG=C
-LC_ALL=C
-
-abs_dirname=$(cd $(dirname $0) && pwd)
+. ./rpmbuild.conf
 
 function update_repo() {
   git pull
 }
 
 function setup_chroot_dir() {
-  cd ${abs_dirname}/../../
-  [ -d tmp/vmapp_builder/chroot/base ] || mkdir -p tmp/vmapp_builder/chroot/base/
-  cd   tmp/vmapp_builder/chroot/base
+  [ -d ${tmp_dir}/chroot/base ] || mkdir -p ${tmp_dir}/chroot/base/
+  cd ${tmp_dir}/chroot/base
 
   distro_name="centos"
   distro_relver="6"
@@ -25,7 +21,6 @@ function setup_chroot_dir() {
   distro="${distro_name}-${distro_ver}"
   distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
-  archs="i686 x86_64"
   for arch in ${archs}; do
     [ -f ${distro_detail}_${arch}.tar.gz ] || curl -R -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_detail}_${arch}.tar.gz
     [ -d ${distro_detail}_${arch}        ] || tar zxpf ${distro_detail}_${arch}.tar.gz

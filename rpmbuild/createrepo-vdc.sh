@@ -1,9 +1,9 @@
 #!/bin/bash
 
 set -e
-set -x
+#set -x
 
-. ./config_s3.env
+. ./rpmbuild.conf
 
 [ -d ${rpm_dir} ] || mkdir -p ${rpm_dir}
 
@@ -13,7 +13,7 @@ for arch in ${archs}; do
   x86_64) basearch=${arch};;
   esac
 
-  chroot_dir=$(cd ../../ && pwd)/tmp/vmapp_builder/chroot/dest/centos-6_${arch}
+  chroot_dir=${tmp_dir}/chroot/dest/centos-6_${arch}
 
   #
   # arch, basearch

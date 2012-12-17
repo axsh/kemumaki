@@ -5,9 +5,10 @@ images/*
 tmp/*
 builders/*/copy.txt
 config/kemumaki.conf
-*.tar.gz
-*-stamp
 config/vms/*.conf
 config/vms/*.nic
 centos-*
-wakame-vdc
+
+# rpmbuild
+rpmbuild/tmp
+rpmbuild/*-stamp

@@ -5,19 +5,15 @@
 #   rsync, tar, ls
 #
 set -e
-set -x
+#set -x
 
-. ./config_s3.env
+. ./rpmbuild.conf
 
-abs_dirname=$(cd $(dirname $0) && pwd)
 vdc_repo_dir=$1
 [[ -d ${vdc_repo_dir} ]] || {
   echo "ERROR: repository not found: ${vdc_repo_dir}" >/dev/stderr
   exit 1
 }
-
-checkout_target=$2
-[[ -n ${checkout_target} ]] && (cd ${vdc_repo_dir} && git checkout ${checkout_target})
 
 vdc_build_id=$(cd ${vdc_repo_dir} && git log -n 1 --pretty=format:"%h")
 

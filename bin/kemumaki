@@ -2,16 +2,47 @@
 
 set -e
 
+function checkroot() {
+  #
+  # Check if we're running as root, and bail out if we're not.
+  #
+  [[ "${UID}" -ne 0 ]] && {
+    echo "[ERROR] Must run as root." >&2
+    return 1
+  } || :
+}
+
 function vm_names(){
   # sort vm names by node_id
-  echo $(find ${vm_config_dir} -maxdepth 1 -name '*.conf' | while read file; do
+  find ${vm_config_dir} -maxdepth 1 -name '*.conf' | while read file; do
     echo "${vm_names} $(basename $file | sed -e 's/\.conf//g'):$(grep ^node_id $file | sed -e 's/^node_id=\([0-9]*\)$/\1/')"
-  done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//')
+  done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//'
+}
+
+function vdc_build_id(){
+  cd ${vdc_repo_dir}
+  git log -n 1 --pretty=format:"%h"
+}
+
+function vdc_release_id(){
+  git_checkout
+  cd ${vdc_repo_dir}
+  ./rpmbuild/helpers/gen-release-id.sh
+}
+
+function git_checkout(){
+  [[ -n ${vdc_commit_id} ]] || return 0
+  cd ${vdc_repo_dir}
+  git checkout ${vdc_commit_id}
 }
 
 function prepare(){
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
+  mkdir -p ${rpmbuild_tmp_dir}
+  mkdir -p ${vdc_repo_dir}
+
+  [[ "$(ls -A ${vdc_repo_dir})" ]] || git clone git://github.com/axsh/wakame-vdc.git ${vdc_repo_dir}
 }
 
 function load_config(){
@@ -43,23 +74,12 @@ ${redis_host} redis-server
 EOS
 }
 
-function checkroot() {
-  #
-  # Check if we're running as root, and bail out if we're not.
-  #
-  [[ "${UID}" -ne 0 ]] && {
-    echo "[ERROR] Must run as root." >&2
-    return 1
-  } || :
-}
-
-function rpmbuild() {
-  local checkout_target=$1
-  cd ${rpmbuild_script_dir}
-
+function rpmbuild(){
+  git_checkout
   echo "start rpmbuilding."
+  cd ${rpmbuild_dir}
   ./setup-ci-env.sh setup_chroot_dir
-  ./spot-build.sh ${vdc_repo_dir} ${checkout_target}
+  ./spot-build.sh ${vdc_repo_dir}
 }
 
 function each_vm(){
@@ -146,7 +166,7 @@ function stop_vm(){
 }
 
 function run(){
-  find -L ${base_dir}/tests-enabled -type f -name $1 | sort | while read file; do
+  find -L ${abs_dirname}/tests-enabled -type f -name $1 | sort | while read file; do
     echo running $(basename $(dirname file))
     ${file}
   done
@@ -155,22 +175,18 @@ function run(){
 export LC_ALL=C
 export LANG=C
 
-base_dir=$(cd $(dirname $0)/..; pwd)
-
-[[ -f ${base_dir}/.kemumakirc ]] && . ${base_dir}/.kemumakirc || :
-
-command=${1}
-script_dir=${base_dir}/scripts
-config_dir=${KEMUMAKI_CONFIG_DIR:-${base_dir}/config}
-vdc_repo_dir=${VDC_REPO_DIR:-${base_dir}/wakame-vdc}
+abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
+script_dir=${abs_dirname}/scripts
+config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
+vdc_repo_dir=${VDC_REPO_DIR:-$(cd ${abs_dirname}/../ && pwd)/wakame-vdc}
+vdc_commit_id=${VDC_COMMIT_ID}
 vm_config_dir=${config_dir}/vms
-vmbuilder_data_dir=${base_dir}/builders
-image_dir=${base_dir}/images
-tmp_dir=${base_dir}/tmp
-rpmbuild_dir=${base_dir}/rpmbuild
-rpmbuild_script_dir=${rpmbuild_dir}/ops
-helpers_script_dir=${rpmbuild_dir}/helpers
-vmbuilder_dir=${base_dir}/vmbuilder
+vmbuilder_data_dir=${abs_dirname}/builders
+image_dir=${abs_dirname}/images
+tmp_dir=${abs_dirname}/tmp
+rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
+rpmbuild_dir=${abs_dirname}/rpmbuild
+vmbuilder_dir=${abs_dirname}/vmbuilder
 vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
 kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
 vnc_port=${vnc_port:-1001}
@@ -185,28 +201,42 @@ checkroot
 load_config
 prepare
 
+command=${1}
+shift
+
 case ${command} in
   rpmbuild)
-    shift
-    rpmbuild $1
+    case $1 in
+    clean)
+      rm -rf ${rpmbuild_tmp_dir} 
+      exit 0
+      ;;
+    *)
+      [[ -n $1 ]] && {
+        vdc_commit_id=$1
+        shift
+      }
+      rpmbuild
+      ;;
+    esac
     ;;
   build_vm)
-    if [[ -n "${2}" ]]; then
-      build_vm $2
+    if [[ -n "${1}" ]]; then
+      build_vm $1
     else
       each_vm build_vm
     fi
     ;;
   start_vm)
-    if [[ -n "${2}" ]]; then
-      start_vm $2
+    if [[ -n "${1}" ]]; then
+      start_vm $1
     else
       each_vm start_vm
     fi
     ;;
   stop_vm)
-    if [[ -n "${2}" ]]; then
-      stop_vm $2
+    if [[ -n "${1}" ]]; then
+      stop_vm $1
     else
       each_vm stop_vm
     fi
@@ -218,9 +248,12 @@ case ${command} in
     run report
     ;;
   *)
+    [[ -n $1 ]] && {
+      vdc_commit_id=$1
+      shift
+    }
     rpmbuild
-    stop_local_repo_server
-    each start_vm
+    each_vm stop_vm build_vm start_vm
     run test
     run report
     ;;
