@@ -141,7 +141,7 @@ EOS
 }
 
 for mount_target in proc dev; do
-  mount | grep ${dest_chroot_dir}/${mount_target} || {
+  mount | grep ${dest_chroot_dir}/${mount_target} && {
     umount -l ${dest_chroot_dir}/${mount_target}
   }
 done
