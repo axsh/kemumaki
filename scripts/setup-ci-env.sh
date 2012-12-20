@@ -3,15 +3,15 @@
 set -e
 #set -x
 
-. ./rpmbuild.conf
+. ./../config/rpmbuild.conf
 
 function update_repo() {
   git pull
 }
 
 function setup_chroot_dir() {
-  [ -d ${tmp_dir}/chroot/base ] || mkdir -p ${tmp_dir}/chroot/base/
-  cd ${tmp_dir}/chroot/base
+  [ -d ${rpmbuild_tmp_dir}/chroot/base ] || mkdir -p ${rpmbuild_tmp_dir}/chroot/base/
+  cd ${rpmbuild_tmp_dir}/chroot/base
 
   distro_name="centos"
   distro_relver="6"

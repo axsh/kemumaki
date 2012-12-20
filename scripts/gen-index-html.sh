@@ -3,7 +3,7 @@
 set -e
 #set -x
 
-. ./rpmbuild.conf
+. ./../config/rpmbuild.conf
 
 # add noarch to basearchs
 basearchs="${basearchs} noarch"

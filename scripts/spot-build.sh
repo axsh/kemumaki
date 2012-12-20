@@ -7,7 +7,7 @@
 set -e
 #set -x
 
-. ./rpmbuild.conf
+. ./../config/rpmbuild.conf
 
 vdc_repo_dir=$1
 [[ -d ${vdc_repo_dir} ]] || {

@@ -4,7 +4,7 @@
 set -e
 #set -x
 
-. ./rpmbuild.conf
+. ./../config/rpmbuild.conf
 
 args=
 while [ $# -gt 0 ]; do
@@ -42,10 +42,10 @@ esac
   exit 1
 }
 
-[[ -d "$tmp_dir" ]] || mkdir -p "$tmp_dir"
+[[ -d "$rpmbuild_tmp_dir" ]] || mkdir -p "$rpmbuild_tmp_dir"
 
-base_chroot_dir=${tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
-dest_chroot_dir=${tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
+base_chroot_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
+dest_chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
 [ -d ${base_chroot_dir} ] || {
   ${vmbuilder_dir}/kvm/rhel/6/cebootstrap.sh \

@@ -78,7 +78,7 @@ EOS
 function rpmbuild(){
   git_checkout
   echo "start rpmbuilding."
-  cd ${rpmbuild_dir}
+  cd ${script_dir}
   ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh ${vdc_repo_dir}
 }
@@ -173,9 +173,6 @@ function run(){
   done
 }
 
-export LC_ALL=C
-export LANG=C
-
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
 config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
@@ -186,7 +183,6 @@ vmbuilder_data_dir=${abs_dirname}/builders
 image_dir=${abs_dirname}/images
 tmp_dir=${abs_dirname}/tmp
 rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-rpmbuild_dir=${abs_dirname}/rpmbuild
 vmbuilder_dir=${abs_dirname}/vmbuilder
 vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
 kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh

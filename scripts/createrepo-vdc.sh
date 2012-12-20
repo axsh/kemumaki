@@ -3,7 +3,7 @@
 set -e
 #set -x
 
-. ./rpmbuild.conf
+. ./../config/rpmbuild.conf
 
 [ -d ${rpm_dir} ] || mkdir -p ${rpm_dir}
 
@@ -13,7 +13,7 @@ for arch in ${archs}; do
   x86_64) basearch=${arch};;
   esac
 
-  chroot_dir=${tmp_dir}/chroot/dest/centos-6_${arch}
+  chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/centos-6_${arch}
 
   #
   # arch, basearch
