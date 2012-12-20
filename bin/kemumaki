@@ -202,8 +202,10 @@ checkroot
 load_config
 prepare
 
-command=${1}
-shift
+[[ -n $1 ]] && {
+  command=${1}
+  shift
+}
 
 case ${command} in
   rpmbuild)
