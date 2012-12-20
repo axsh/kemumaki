@@ -14,7 +14,7 @@ cat <<'EOS' | chroot $1 bash -c "cat | bash"
 echo root:root | chpasswd
 
 curl -o /etc/yum.repos.d/wakame-vdc.repo -R https://raw.github.com/axsh/wakame-vdc/master/rpmbuild/wakame-vdc.repo
-yum install -y http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-7.noarch.rpm
+yum install -y http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
 
 yum install -y wakame-vdc-dcmgr-vmapp-config
 yum install -y wakame-vdc-admin-vmapp-config

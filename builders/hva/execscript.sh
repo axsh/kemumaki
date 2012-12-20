@@ -15,7 +15,7 @@ echo root:root | chpasswd
 
 ## yum repositories
 curl -o /etc/yum.repos.d/openvz.repo     -R https://raw.github.com/axsh/wakame-vdc/master/rpmbuild/openvz.repo
-yum install -y http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-7.noarch.rpm
+yum install -y http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
 
 yum clean metadata --disablerepo=* --enablerepo=wakame-vdc-rhel6
 yum update  -y --disablerepo=* --enablerepo=wakame-vdc-rhel6
