@@ -31,9 +31,9 @@ function vdc_release_id(){
 }
 
 function git_checkout(){
-  [[ -n ${vdc_commit_id} ]] || return 0
+  [[ -n ${vdc_checkout_target} ]] || return 0
   cd ${vdc_repo_dir}
-  git checkout ${vdc_commit_id}
+  git checkout ${vdc_checkout_target}
 }
 
 function prepare(){
@@ -177,7 +177,7 @@ abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
 config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
 vdc_repo_dir=${vdc_repo_dir:-${abs_dirname}/wakame-vdc}
-vdc_commit_id=${VDC_COMMIT_ID}
+vdc_checkout_target=${VDC_CHECKOUT_TARGET}
 vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${abs_dirname}/builders
 image_dir=${abs_dirname}/images
@@ -212,7 +212,7 @@ case ${command} in
       ;;
     *)
       [[ -n $1 ]] && {
-        vdc_commit_id=$1
+        vdc_checkout_target=$1
         shift
       }
       rpmbuild
@@ -248,7 +248,7 @@ case ${command} in
     ;;
   *)
     [[ -n $1 ]] && {
-      vdc_commit_id=$1
+      vdc_checkout_target=$1
       shift
     }
     rpmbuild
