@@ -28,7 +28,6 @@ function vdc_build_id(){
 }
 
 function vdc_release_id(){
-  git_checkout
   cd ${vdc_repo_dir}
   ./rpmbuild/helpers/gen-release-id.sh
 }
@@ -78,12 +77,33 @@ ${redis_host} redis-server
 EOS
 }
 
+function notify(){
+  [[ "${hipchat_notification}" = true ]] || return 0
+  local message=$1
+  # add jenkins build url
+  [[ -z ${BUILD_URL} ]] || message="${BUILD_URL} ${message}"
+  echo -e "${message} " | ${script_dir}/hipchat_room_message -t ${hipchat_token} -r ${hipchat_room_id} -f ${hipchat_from_name}
+}
+
+function notify_rpmbuild(){
+  local state=${1:-unknown}
+  local release_id=$(vdc_release_id)
+  local repo_uri=$(cd ${vdc_repo_dir} && git remote -v | awk '{print $2}' | sort | uniq)
+  local branch=$(cd ${vdc_repo_dir} && git branch --no-color | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+  notify "rpmbuild: ${state}> ${branch} of ${repo_uri} (${release_id})"
+}
+
 function rpmbuild(){
   git_checkout
-  echo "start rpmbuilding."
+  echo "start rpmbuild"
+  notify_rpmbuild started
+  trap "notify_rpmbuild failed && return 1" ERR
   cd ${script_dir}
   ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh ${vdc_repo_dir}
+  trap ERR
+  notify_rpmbuild done
+  echo "done: rpmbuild"
 }
 
 function each_vm(){
@@ -176,6 +196,8 @@ function run(){
   done
 }
 
+checkroot
+
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
 # expand environment variable
@@ -198,8 +220,14 @@ netmask=${netmask:-255.255.255.0}
 dns=${dns:-8.8.8.8}
 vm_names=$(vm_names)
 
-checkroot
 load_config
+
+# hipchat
+hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
+hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-e0d73c2c95311dccfe211f610b08f9}}
+hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-26976}}
+hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-kemumaki}}
+
 prepare
 
 [[ -n $1 ]] && {
