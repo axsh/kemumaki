@@ -57,9 +57,8 @@ function prepare(){
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${vdc_dir}
 
-  ( cd ${vdc_dir} && git status || git clone ${vdc_repo_url} )
-
   update_kemumaki
+  ( cd ${vdc_dir} && git status || git clone ${vdc_repo_url} )
 }
 
 function load_config(){
