@@ -9,20 +9,20 @@ set -e
 
 . ./../config/rpmbuild.conf
 
-vdc_repo_dir=$1
-[[ -d ${vdc_repo_dir} ]] || {
-  echo "ERROR: repository not found: ${vdc_repo_dir}" >/dev/stderr
+vdc_dir=$1
+[[ -d ${vdc_dir} ]] || {
+  echo "ERROR: repository not found: ${vdc_dir}" >/dev/stderr
   exit 1
 }
 
-vdc_build_id=$(cd ${vdc_repo_dir} && git log -n 1 --pretty=format:"%h")
+vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
 
 [[ $UID -ne 0 ]] && {
   echo "ERROR: Run as root" >/dev/stderr
   exit 1
 }
 
-release_id=$(${vdc_repo_dir}/rpmbuild/helpers/gen-release-id.sh)
+release_id=$(${vdc_dir}/rpmbuild/helpers/gen-release-id.sh)
 [[ -f ${release_id}.tar.gz ]] && {
   echo "already built: ${release_id}" >/dev/stderr
   exit 0
@@ -36,7 +36,7 @@ release_id=$(${vdc_repo_dir}/rpmbuild/helpers/gen-release-id.sh)
 # Build step 'Execute shell' marked build as failure
 # Finished: FAILURE
 
-time REPO_URI=$(cd ${vdc_repo_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
+time REPO_URI=$(cd ${vdc_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
 
 [[ -d ${rpm_dir} ]] &&  mkdir -p ${rpm_dir} || :
 time ./createrepo-vdc.sh

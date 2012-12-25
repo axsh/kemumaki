@@ -4,6 +4,7 @@ LANG=C
 LC_ALL=C
 
 set -e
+set -x
 
 function checkroot() {
   #
@@ -23,28 +24,42 @@ function vm_names(){
 }
 
 function vdc_build_id(){
-  cd ${vdc_repo_dir}
+  cd ${vdc_dir}
   git log -n 1 --pretty=format:"%h"
 }
 
 function vdc_release_id(){
-  cd ${vdc_repo_dir}
+  cd ${vdc_dir}
   ./rpmbuild/helpers/gen-release-id.sh
 }
 
-function git_checkout(){
-  [[ -n ${vdc_checkout_target} ]] || return 0
-  cd ${vdc_repo_dir}
-  git checkout ${vdc_checkout_target}
+function update_vdc(){
+  sync_repo ${vdc_repo_url} ${vdc_branch} ${vdc_dir}
+}
+
+function update_kemumaki(){
+  sync_repo ${kemumaki_repo_url} ${kemumaki_branch} ${abs_dirname}
+}
+
+function sync_repo(){
+  local repo_url=$1
+  local target=$2
+  local destination=$3
+  cd ${destination}
+  local revision=$(git ls-remote ${repo_url} ${target} | awk '{print $1}')
+  git fetch origin && git fetch --tags origin && git reset --hard ${revision:-${target}}
+  git submodule update --init
 }
 
 function prepare(){
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
-  mkdir -p ${vdc_repo_dir}
+  mkdir -p ${vdc_dir}
 
-  [[ "$(ls -A ${vdc_repo_dir})" ]] || git clone git://github.com/axsh/wakame-vdc.git ${vdc_repo_dir}
+  [[ "$(ls -A ${vdc_dir})" ]] || cd ${vdc_dir}/../ && git clone ${vdc_repo_url}
+
+  update_kemumaki
 }
 
 function load_config(){
@@ -88,19 +103,17 @@ function notify(){
 function notify_rpmbuild(){
   local state=${1:-unknown}
   local release_id=$(vdc_release_id)
-  local repo_uri=$(cd ${vdc_repo_dir} && git remote -v | awk '{print $2}' | sort | uniq)
-  local branch=$(cd ${vdc_repo_dir} && git branch --no-color | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
-  notify "rpmbuild: ${state}> ${branch} of ${repo_uri} (${release_id})"
+  notify "rpmbuild: ${state}> ${vdc_branch} of ${vdc_repo_url} (${release_id})"
 }
 
 function rpmbuild(){
-  git_checkout
+  update_vdc
   echo "start rpmbuild"
   notify_rpmbuild started
   trap "notify_rpmbuild failed && return 1" ERR
   cd ${script_dir}
   ./setup-ci-env.sh setup_chroot_dir
-  ./spot-build.sh ${vdc_repo_dir}
+  ./spot-build.sh ${vdc_dir}
   trap ERR
   notify_rpmbuild done
   echo "done: rpmbuild"
@@ -202,8 +215,7 @@ abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
 # expand environment variable
 eval config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-vdc_repo_dir=${vdc_repo_dir:-${abs_dirname}/wakame-vdc}
-vdc_checkout_target=${KEMUMAKI_VDC_CHECKOUT_TARGET}
+vdc_checkout_target=${GIT_COMMIT}
 vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${abs_dirname}/builders
 image_dir=${abs_dirname}/images
@@ -227,6 +239,11 @@ hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
 hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-e0d73c2c95311dccfe211f610b08f9}}
 hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-26976}}
 hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-kemumaki}}
+
+# vdc
+vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-git@github.com:axsh/wakame-vdc.git}}
+vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
+vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
 
 prepare
 

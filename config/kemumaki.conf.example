@@ -1,3 +1,12 @@
+LANG=C
+LC_ALL=C
+
+kemumaki_repo_url=git://github.com/axsh/kemumaki.git
+kemumaki_branch=master
+
+vdc_repo_url=git://github.com/axsh/wakame-vdc.git
+vdc_branch=master
+
 redis_host=192.168.2.30
 amqp_host=192.168.2.151
 
