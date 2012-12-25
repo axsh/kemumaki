@@ -57,7 +57,7 @@ function prepare(){
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${vdc_dir}
 
-  [[ "$(ls -A ${vdc_dir})" ]] || cd ${vdc_dir}/../ && git clone ${vdc_repo_url}
+  ( cd ${vdc_dir} && git status || git clone ${vdc_repo_url} )
 
   update_kemumaki
 }
@@ -233,6 +233,10 @@ dns=${dns:-8.8.8.8}
 vm_names=$(vm_names)
 
 load_config
+
+# kemumaki
+kemumaki_repo_url=${kemumaki_repo_url:-git://github.com/axsh/kemumaki.git}
+kemumaki_branch=${kemumaki_branch:-master}
 
 # hipchat
 hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
