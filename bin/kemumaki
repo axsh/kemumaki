@@ -34,7 +34,8 @@ function vdc_release_id(){
 }
 
 function update_vdc(){
-  sync_repo ${vdc_repo_url} ${vdc_branch} ${vdc_dir}
+  [[ -n ${GIT_COMMIT} ]] && return 0 # running on jenkins
+  sync_repo ${vdc_repo_url} ${vdc_checkout_target:-${vdc_branch}} ${vdc_dir}
 }
 
 function update_kemumaki(){
@@ -45,9 +46,14 @@ function sync_repo(){
   local repo_url=$1
   local target=$2
   local destination=$3
+  [[ $# -eq 3 ]] || { echo "[ERROR] Wrong number of arguments $# for 3" >&2; return 1; }
+  local revision=${target}
   cd ${destination}
-  local revision=$(git ls-remote ${repo_url} ${target} | awk '{print $1}')
-  git fetch origin && git fetch --tags origin && git reset --hard ${revision:-${target}}
+  [[ "${target}" =~ ^[0-9a-f]{40}$ ]] || {
+    revision=$(git ls-remote ${repo_url} ${target} | egrep "[0-9a-f]{40} *refs/[^/]*/${target}" | cut -c1-40)
+  }
+  
+  git fetch origin && git fetch --tags origin && git reset --hard ${revision}
   git submodule update --init
 }
 
@@ -214,7 +220,7 @@ abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
 # expand environment variable
 eval config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-vdc_checkout_target=${GIT_COMMIT}
+vdc_checkout_target=${vdc_checkout_target:-}
 vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${abs_dirname}/builders
 image_dir=${abs_dirname}/images
@@ -244,7 +250,7 @@ hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-26976}}
 hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-kemumaki}}
 
 # vdc
-vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-git@github.com:axsh/wakame-vdc.git}}
+vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-git://github.com/axsh/wakame-vdc.git}}
 vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
 vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
 
