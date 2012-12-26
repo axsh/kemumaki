@@ -112,7 +112,7 @@ function notify_rpmbuild(){
 }
 
 function rpmbuild(){
-  update_vdc
+  #update_vdc # currently don't work with jenkins
   echo "start rpmbuild"
   notify_rpmbuild started
   trap "notify_rpmbuild failed && return 1" ERR
