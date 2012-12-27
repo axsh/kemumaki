@@ -19,7 +19,6 @@ ssh_key=/root/.ssh/id_rsa.pub
 ssh_user_key=${HOME}/.ssh/id_rsa.pub
 
 hipchat_notification=false
-hipchat_token=e0d73c2c95311dccfe211f610b08f9
-hipchat_room_id=100801 # wakame
-#hipchat_room_id=108851 # ci-env
+hipchat_token=
+hipchat_room_id=
 hipchat_from_name=kemumaki

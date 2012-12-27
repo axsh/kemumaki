@@ -245,9 +245,9 @@ kemumaki_branch=${kemumaki_branch:-master}
 
 # hipchat
 hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
-hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-e0d73c2c95311dccfe211f610b08f9}}
-hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-26976}}
-hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-kemumaki}}
+hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-}}
+hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-}}
+hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-}}
 
 # vdc
 vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-git://github.com/axsh/wakame-vdc.git}}
