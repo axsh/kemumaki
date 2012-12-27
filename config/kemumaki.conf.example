@@ -1,6 +1,10 @@
 LANG=C
 LC_ALL=C
 
+# standalone: don't update kemumaki. update vdc
+# jenkins: update kemumaki. dont update vdc
+run_mode=standalone
+
 kemumaki_repo_url=git://github.com/axsh/kemumaki.git
 kemumaki_branch=master
 

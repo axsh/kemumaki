@@ -34,7 +34,6 @@ function vdc_release_id(){
 }
 
 function update_vdc(){
-  [[ -n ${GIT_COMMIT} ]] && return 0 # running on jenkins
   sync_repo ${vdc_repo_url} ${vdc_checkout_target:-${vdc_branch}} ${vdc_dir}
 }
 
@@ -50,9 +49,9 @@ function sync_repo(){
   local revision=${target}
   cd ${destination}
   [[ "${target}" =~ ^[0-9a-f]{40}$ ]] || {
-    revision=$(git ls-remote ${repo_url} ${target} | egrep "[0-9a-f]{40} *refs/[^/]*/${target}" | cut -c1-40)
+    revision=$(git ls-remote ${repo_url} ${target} | egrep "[0-9a-f]{40}[[:space:]]+refs/.*?/${target}" | cut -c1-40)
   }
-  
+
   git fetch origin && git fetch --tags origin && git reset --hard ${revision}
   git submodule update --init
 }
@@ -63,7 +62,7 @@ function prepare(){
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${vdc_dir}
 
-  update_kemumaki
+  [[ "${run_mode}" = standalone ]] || update_kemumaki
   ( cd ${vdc_dir} && git status || git clone ${vdc_repo_url} )
 }
 
@@ -112,8 +111,8 @@ function notify_rpmbuild(){
 }
 
 function rpmbuild(){
-  #update_vdc # currently don't work with jenkins
   echo "start rpmbuild"
+  [[ "${run_mode}" = jenkins ]] || update_vdc
   notify_rpmbuild started
   trap "notify_rpmbuild failed && return 1" ERR
   cd ${script_dir}
@@ -240,6 +239,7 @@ vm_names=$(vm_names)
 load_config
 
 # kemumaki
+run_mode=${run_mode:-jenkins}
 kemumaki_repo_url=${kemumaki_repo_url:-git://github.com/axsh/kemumaki.git}
 kemumaki_branch=${kemumaki_branch:-master}
 
