@@ -22,7 +22,7 @@ vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
   exit 1
 }
 
-release_id=$(${vdc_dir}/rpmbuild/helpers/gen-release-id.sh)
+release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 [[ -f ${release_id}.tar.gz ]] && {
   echo "already built: ${release_id}" >/dev/stderr
   exit 0
@@ -36,13 +36,21 @@ release_id=$(${vdc_dir}/rpmbuild/helpers/gen-release-id.sh)
 # Build step 'Execute shell' marked build as failure
 # Finished: FAILURE
 
-time REPO_URI=$(cd ${vdc_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
+#time REPO_URI=$(cd ${vdc_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
 
-[[ -d ${rpm_dir} ]] &&  mkdir -p ${rpm_dir} || :
+[[ -d ${rpm_dir} ]] &&  rmdir -p ${rpm_dir} || :
 time ./createrepo-vdc.sh
 
-#[[ -d ${release_id} ]] && rm -rf ${release_id} || :
-#rsync -avx ${rpm_dir} ${release_id}
-#
-#tar zcvpf ${release_id}.tar.gz ${release_id}
-#ls -la ${release_id}.tar.gz
+[[ -d ${yum_repository_dir}/master ]] || mkdir -p ${yum_repository_dir}/master
+
+(
+  cd ${yum_repository_dir}/master
+  [[ -d ${release_id} ]] && rm -rf ${release_id} || :
+  rsync -avx ${rpm_dir}/ ${release_id}
+
+  tar zcvpf ${release_id}.tar.gz ${release_id}
+  ls -la ${release_id}.tar.gz
+)
+
+[[ -L ${yum_repository_dir}/current ]] && rm ${yum_repository_dir}/current
+ln -s ${yum_repository_dir}/master/${release_id} ${yum_repository_dir}/current
