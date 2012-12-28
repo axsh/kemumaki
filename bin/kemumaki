@@ -6,6 +6,8 @@ LC_ALL=C
 set -e
 set -x
 
+exec > >(tee kemumaki.log) 2>&1
+
 function checkroot() {
   #
   # Check if we're running as root, and bail out if we're not.
