@@ -14,7 +14,7 @@ cat <<'EOS' | chroot $1 bash -c "cat | bash"
 echo root:root | chpasswd
 
 ## yum repositories
-yum install -y http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
+rpm -ivh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
 
 yum clean metadata --disablerepo=* --enablerepo=wakame-vdc-rhel6
 yum update  -y --disablerepo=* --enablerepo=wakame-vdc-rhel6
@@ -40,20 +40,6 @@ mkdir -p /etc/wakame-vdc/convert_specs
 mkdir -p /etc/wakame-vdc/dcmgr_gui
 mkdir -p /etc/wakame-vdc/admin
 
-nodes="
- admin
- auth
- collector
- dcmgr
- metadata
- proxy
- webui
-"
-for node in ${nodes}; do
-  sed -i -e 's/^#\(RUN=yes\)/\1/' /etc/default/vdc-${node}
-done
-
-
 /sbin/chkconfig       ntpd on
 /sbin/chkconfig       ntpdate on
 /sbin/chkconfig --add mysqld
@@ -70,15 +56,25 @@ cp -f /opt/axsh/wakame-vdc/dcmgr/config/convert_specs/load_balancer.yml.example 
 cp -f /opt/axsh/wakame-vdc/frontend/admin/config/admin.yml.example /etc/wakame-vdc/admin/admin.yml
 echo "$(eval "echo \"$(cat /opt/axsh/wakame-vdc/tests/vdc.sh.d/proxy.conf.tmpl)\"")" > /etc/wakame-vdc/proxy.conf
 
-# data initialization
-#echo "vdc_data=/opt/axsh/wakame-vdc /opt/axsh/wakame-vdc/tests/vdc.sh init" >> /etc/rc.local
+# openvswitch
+rpm -ql kmod-openvswitch-vzkernel >/dev/null || yum install -y http://dlc.wakame.axsh.jp/packages/rhel/6/master/20120912124632gitff83ce0/${basearch}/kmod-openvswitch-vzkernel-1.6.1-1.el6.${arch}.rpm
+
+## configure edge networking
+case "${VDC_NETWORK}" in
+openflow)
+  /opt/axsh/wakame-vdc/rpmbuild/helpers/set-openvswitch-conf.sh
+  cp -f /etc/rc.d/rc.local.openflow /etc/rc.d/rc.local
+  ;;
+netfilter|*)
+  # default
+  yum remove -y kmod-openvswitch-vzkernel
+  chkconfig openvswitch off
+  cp -f /etc/rc.d/rc.local.netfilter /etc/rc.d/rc.local
+  ;;
+esac
 
 # notification
 (cd /opt/axsh; git clone https://github.com/caquino/redis-bash.git)
 echo "/opt/axsh/redis-bash/redis-bash-cli -h redis-server publish \$(hostname) ready" >> /etc/rc.local
-
-# change proxy path
-# TODO prepare webdav server for vdc-proxy
-sed -i -e "s/localhost/amqp-server/" /opt/axsh/wakame-vdc/tests/vdc.sh.d/demodata_images.sh
 
 EOS

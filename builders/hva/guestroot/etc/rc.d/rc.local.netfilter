@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# This script will be executed *after* all the other init scripts.
+# You can put your own initialization stuff in here if you don't
+# want to do the full Sys V style init stuff.
+
+touch /var/lock/subsys/local
+
+## Wakame-VDC
+
+### stop services
+
+initctl stop vdc-hva
+
+### copy hva.conf
+
+/bin/cp -f /etc/wakame-vdc/hva.conf.netfilter /etc/wakame-vdc/hva.conf
+
+### prepare to start vdc-*
+
+sed -i "s,^#RUN=.*,RUN=yes," /etc/default/vdc-*
+sed -i "s/^#\(AMQP_ADDR\)=.*/\1=amqp-server/" /etc/default/vdc-*
+
+### start services
+
+#/opt/axsh/wakame-vdc/rpmbuild/helpers/self-init-vdcbox.sh start
+initctl start vdc-hva
+
+#initctl start vdc-hva-worker ID=openvz32
+initctl start vdc-hva-worker ID=openvz64

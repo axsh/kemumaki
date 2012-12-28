@@ -80,22 +80,36 @@ function generate_copy_file(){
   local vm_name=$1 vm_type=$2
   [[ -n "${vm_name}" ]] || { echo "[ERROR] Invalid argument: vm_name:${vm_name}" >&2; return 1; }
   [[ -n "${vm_type}" ]] || { echo "[ERROR] Invalid argument: vm_type:${vm_type}" >&2; return 1; }
-  generate_hosts $1
-  cat <<EOS > ${vmbuilder_data_dir}/${vm_type}/copy.txt
-${tmp_dir}/hosts /etc/hosts
-${config_dir}/wakame-vdc.repo /etc/yum.repos.d/wakame-vdc.repo
-EOS
+  rm -rf ${tmp_dir}/guestroot
+  cp -a ${vmbuilder_data_dir}/guestroot_common ${tmp_dir}/guestroot
+  cp -af ${vmbuilder_data_dir}/${vm_type}/guestroot ${tmp_dir}/
+  generate_hosts ${vm_name} ${tmp_dir}/guestroot/etc
+
+  (
+    cd ${tmp_dir}/guestroot
+    echo "[INFO](copyfile) Generating copy.txt"
+    find . ! -type d | sed s,^\.,, | egrep -v '^/(.gitkeep|functions.sh)' | while read line; do
+      echo ${tmp_dir}/guestroot${line} ${line}
+    done > ${tmp_dir}/copy.txt
+  )
+  cat ${tmp_dir}/copy.txt
 }
 
 function generate_hosts(){
-  local hostname=$1
+  local hostname=$1 dest=$2
   [[ -n "${hostname}" ]] || { echo "[ERROR] Invalid argument: hostname:${hostname}" >&2; return 1; }
-  cat <<EOS > ${tmp_dir}/hosts
+  [[ -d ${dest} ]] || { echo "[ERROR] Invalid argument: dest:${dest}" >&2; return 1; }
+
+  echo "[INFO](copyfile) Generating hosts"
+
+  cat <<EOS > ${dest}/hosts
 127.0.0.1 localhost
 127.0.0.1 ${hostname}
-${amqp_host} amqp-server
-${redis_host} redis-server
 EOS
+  [[ -z ${amqp_host} ]] || echo ${amqp_host} amqp-server >> ${dest}/hosts
+  [[ -z ${redis_host} ]] || echo ${redis_host} redis-server >> ${dest}/hosts
+  [[ -z ${vdc_yum_repo_host} ]] || echo ${vdc_yum_repo_host} vdc-yum-repo-server >> ${dest}/hosts
+  cat ${dest}/hosts
 }
 
 function notify(){
@@ -146,7 +160,7 @@ function build_vm(){
   local name=$1
   load_node_config $name
   local vm_dir=${vmbuilder_data_dir}/${vm_type}
-  local copy=${vm_dir}/copy.txt
+  local copy=${tmp_dir}/copy.txt
   local script=${vm_dir}/execscript.sh
   # TODO versioning
   local raw_file=${raw_file:-${image_dir}/${name}.raw}
@@ -242,7 +256,7 @@ load_config
 
 # kemumaki
 run_mode=${run_mode:-jenkins}
-kemumaki_repo_url=${kemumaki_repo_url:-git://github.com/axsh/kemumaki.git}
+kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
 kemumaki_branch=${kemumaki_branch:-master}
 
 # hipchat
@@ -252,7 +266,7 @@ hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-}}
 hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-}}
 
 # vdc
-vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-git://github.com/axsh/wakame-vdc.git}}
+vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.git}}
 vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
 vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
 
@@ -267,7 +281,7 @@ case ${command} in
   rpmbuild)
     case $1 in
     clean)
-      rm -rf ${rpmbuild_tmp_dir} 
+      rm -rf ${rpmbuild_tmp_dir}
       exit 0
       ;;
     *)
@@ -306,7 +320,7 @@ case ${command} in
   report)
     run report
     ;;
-  *)
+  all)
     [[ -n $1 ]] && {
       vdc_checkout_target=$1
       shift
