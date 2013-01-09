@@ -62,10 +62,11 @@ function prepare(){
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
-  mkdir -p ${vdc_dir}
 
   [[ "${run_mode}" = standalone ]] || update_kemumaki
-  ( cd ${vdc_dir} && git status || git clone ${vdc_repo_url} )
+  [[ -d ${vdc_dir} ]] || {
+    ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir})
+  }
 }
 
 function load_config(){
