@@ -36,7 +36,7 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 # Build step 'Execute shell' marked build as failure
 # Finished: FAILURE
 
-#time REPO_URI=$(cd ${vdc_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
+time REPO_URI=$(cd ${vdc_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
 
 [[ -d ${rpm_dir} ]] &&  rmdir -p ${rpm_dir} || :
 time ./createrepo-vdc.sh
