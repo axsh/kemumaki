@@ -4,12 +4,15 @@ kemumaki.log
 tests-enabled/*
 images/*
 tmp/*
-builders/*/copy.txt
 config/kemumaki.conf
-config/vms/*.conf
-config/vms/*.nic
-centos-*
+centos-*/*
 
 # rpmbuild
 *-stamp
 wakame-vdc/*
+
+# raws
+*.raw
+*.raw.tar
+*.raw.tar.gz
+*.raw.gz

@@ -57,7 +57,7 @@ cp -f /opt/axsh/wakame-vdc/frontend/admin/config/admin.yml.example /etc/wakame-v
 echo "$(eval "echo \"$(cat /opt/axsh/wakame-vdc/tests/vdc.sh.d/proxy.conf.tmpl)\"")" > /etc/wakame-vdc/proxy.conf
 
 # openvswitch
-rpm -ql kmod-openvswitch-vzkernel >/dev/null || yum install -y http://dlc.wakame.axsh.jp/packages/rhel/6/master/20120912124632gitff83ce0/${basearch}/kmod-openvswitch-vzkernel-1.6.1-1.el6.${arch}.rpm
+rpm -ql kmod-openvswitch-vzkernel >/dev/null || yum install -y http://dlc.wakame.axsh.jp/packages/rhel/6/master/20120912124632gitff83ce0/x86_64/kmod-openvswitch-vzkernel-1.6.1-1.el6.x86_64.rpm
 
 ## configure edge networking
 case "${VDC_NETWORK}" in

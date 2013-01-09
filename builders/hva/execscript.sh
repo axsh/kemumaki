@@ -39,6 +39,23 @@ yum install -y ${distro_pkgs}
 # edit boot order to use vzkernel as default.
 /opt/axsh/wakame-vdc/rpmbuild/helpers/edit-grub4vz.sh enable
 
+# openvswitch
+rpm -ql kmod-openvswitch-vzkernel >/dev/null || yum install -y http://dlc.wakame.axsh.jp/packages/rhel/6/master/20120912124632gitff83ce0/x86_64/kmod-openvswitch-vzkernel-1.6.1-1.el6.x86_64.rpm
+
+## configure edge networking
+case "${VDC_NETWORK}" in
+openflow)
+  /opt/axsh/wakame-vdc/rpmbuild/helpers/set-openvswitch-conf.sh
+  cp -f /etc/rc.d/rc.local.openflow /etc/rc.d/rc.local
+  ;;
+netfilter|*)
+  # default
+  yum remove -y kmod-openvswitch-vzkernel
+  chkconfig openvswitch off
+  cp -f /etc/rc.d/rc.local.netfilter /etc/rc.d/rc.local
+  ;;
+esac
+
 # notification
 (cd /opt/axsh; git clone https://github.com/caquino/redis-bash.git)
 echo "/opt/axsh/redis-bash/redis-bash-cli -h redis-server publish \$(hostname) ready" >> /etc/rc.local

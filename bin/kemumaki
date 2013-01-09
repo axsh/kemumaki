@@ -247,7 +247,7 @@ kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
 vnc_port=${vnc_port:-1001}
 monitor_port=${monitor_port:-4444}
 serial_port=${serial_port:-5555}
-brname=${brname:-br0}
+brname=${brname:-vboxbr0}
 netmask=${netmask:-255.255.255.0}
 dns=${dns:-8.8.8.8}
 vm_names=$(vm_names)
@@ -295,9 +295,10 @@ case ${command} in
     ;;
   build_vm)
     if [[ -n "${1}" ]]; then
+      stop_vm $1
       build_vm $1
     else
-      each_vm build_vm
+      each_vm stop_vm build_vm
     fi
     ;;
   start_vm)

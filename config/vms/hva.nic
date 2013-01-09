@@ -1,2 +1,2 @@
 ifname=eth0 bridge=br0
-ifname=br0 ip=192.168.2.153 mask=255.255.255.0 net=192.168.2.0 bcast=192.168.2.255 gw=192.168.2.1 iftype=bridge
+ifname=br0 ip=10.0.2.16 mask=255.255.255.0 net=10.0.2.0 bcast=10.0.2.255 gw=10.0.2.2 iftype=bridge
