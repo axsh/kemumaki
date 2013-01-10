@@ -211,6 +211,7 @@ function start_vm(){
     --name=${name} \
     --drive="file=${file},media=disk,boot=on,index=0,cache=none" \
     --image-path=${image_path} \
+    --brname=${brname} \
     --vnc_port=$((${vnc_port} + ${node_id})) \
     --monitor_port=$((${monitor_port} + ${node_id})) \
     --serial_port=$((${serial_port} + ${node_id}))
