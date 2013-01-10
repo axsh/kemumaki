@@ -1,7 +1,6 @@
 kemumaki.log
 *.swp
 *.swo
-tests-enabled/*
 images/*
 tmp/*
 config/kemumaki.conf
