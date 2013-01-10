@@ -35,6 +35,11 @@ function vdc_release_id(){
   ./rpmbuild/helpers/gen-release-id.sh
 }
 
+function vdc_origin_url(){
+  cd ${vdc_dir}
+  git config --get remote.origin.url
+}
+
 function update_vdc(){
   sync_repo ${vdc_repo_url} ${vdc_checkout_target:-${vdc_branch}} ${vdc_dir}
 }
@@ -63,10 +68,13 @@ function prepare(){
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
 
-  [[ "${run_mode}" = standalone ]] || update_kemumaki
-  [[ -d ${vdc_dir} ]] || {
-    ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir})
-  }
+  if [[ "${run_mode}" = standalone ]]; then
+    [[ -d ${vdc_dir} ]] || {
+      ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir}) )
+    }
+  elif [[ "${run_mode}" = jenkins ]]; then
+    vdc_repo_url=$(vdc_origin_url)
+  fi
 }
 
 function load_config(){
@@ -259,7 +267,6 @@ load_config
 run_mode=${run_mode:-jenkins}
 kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
 kemumaki_branch=${kemumaki_branch:-master}
-
 # hipchat
 hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
 hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-}}
