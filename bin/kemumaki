@@ -239,7 +239,12 @@ function run(){
   done
 }
 
-checkroot
+[[ -n $1 ]] && {
+  command=${1}
+  shift
+}
+
+[[ "${command}" = update ]] || checkroot
 
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
@@ -267,7 +272,8 @@ load_config
 # kemumaki
 run_mode=${run_mode:-jenkins}
 kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
-kemumaki_branch=${kemumaki_branch:-master}
+kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
+
 # hipchat
 hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
 hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-}}
@@ -281,12 +287,11 @@ vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
 
 prepare
 
-[[ -n $1 ]] && {
-  command=${1}
-  shift
-}
-
 case ${command} in
+  update)
+    update_kemumaki
+    exit 0
+    ;;
   rpmbuild)
     case $1 in
     clean)
