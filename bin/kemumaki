@@ -41,7 +41,7 @@ function vdc_origin_url(){
 }
 
 function update_vdc(){
-  sync_repo ${vdc_repo_url} ${vdc_checkout_target:-${vdc_branch}} ${vdc_dir}
+  sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
 }
 
 function update_kemumaki(){
@@ -137,7 +137,7 @@ function notify_rpmbuild(){
 
 function rpmbuild(){
   echo "start rpmbuild"
-  [[ "${run_mode}" = jenkins ]] || update_vdc
+  [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   notify_rpmbuild started
   trap "notify_rpmbuild failed && return 1" ERR
   cd ${script_dir}
@@ -250,7 +250,7 @@ abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 script_dir=${abs_dirname}/scripts
 # expand environment variable
 eval config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-vdc_checkout_target=${vdc_checkout_target:-}
+vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
 vm_config_dir=${config_dir}/vms
 vmbuilder_data_dir=${abs_dirname}/builders
 image_dir=${abs_dirname}/images
@@ -300,7 +300,7 @@ case ${command} in
       ;;
     *)
       [[ -n $1 ]] && {
-        vdc_checkout_target=$1
+        vdc_build_target=$1
         shift
       }
       rpmbuild
@@ -337,7 +337,7 @@ case ${command} in
     ;;
   all)
     [[ -n $1 ]] && {
-      vdc_checkout_target=$1
+      vdc_build_target=$1
       shift
     }
     rpmbuild

@@ -2,7 +2,7 @@ LANG=C
 LC_ALL=C
 
 # standalone: don't update kemumaki. update vdc
-# jenkins: update kemumaki. dont update vdc
+# jenkins: update kemumaki. don't update vdc unless VDC_BUILD_TARGET is specified
 run_mode=standalone
 
 kemumaki_repo_url=git://github.com/axsh/kemumaki.git
@@ -10,7 +10,7 @@ kemumaki_branch=master
 
 vdc_repo_url=git://github.com/axsh/wakame-vdc.git
 vdc_branch=master
-vdc_yum_repo_host=localhost
+vdc_yum_repo_host=
 
 redis_host=
 amqp_host=10.0.2.15
@@ -18,6 +18,8 @@ amqp_host=10.0.2.15
 devel_user=wakame
 ssh_key=/root/.ssh/id_rsa.pub
 ssh_user_key=${HOME}/.ssh/id_rsa.pub
+brname=vboxbr0
+vnc_keymap=ja
 
 hipchat_notification=false
 hipchat_token=
