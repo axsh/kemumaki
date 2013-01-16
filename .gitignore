@@ -4,6 +4,7 @@ kemumaki.log
 images/*
 tmp/*
 config/kemumaki.conf
+config/kemumaki.*.conf
 centos-*/*
 
 # rpmbuild

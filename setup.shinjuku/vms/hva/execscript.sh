@@ -46,18 +46,16 @@ rpm -ql kmod-openvswitch-vzkernel >/dev/null || yum install -y http://dlc.wakame
 case "${VDC_NETWORK}" in
 openflow)
   /opt/axsh/wakame-vdc/rpmbuild/helpers/set-openvswitch-conf.sh
-  cp -f /etc/rc.d/rc.local.openflow /etc/rc.d/rc.local
+  cp -f /etc/wakame-vdc/hva.conf.openflow /etc/wakame-vdc/hva.conf
   ;;
 netfilter|*)
   # default
   yum remove -y kmod-openvswitch-vzkernel
-  chkconfig openvswitch off
-  cp -f /etc/rc.d/rc.local.netfilter /etc/rc.d/rc.local
+  cp -f /etc/wakame-vdc/hva.conf.netfilter /etc/wakame-vdc/hva.conf
   ;;
 esac
 
-# notification
-(cd /opt/axsh; git clone https://github.com/caquino/redis-bash.git)
-echo "/opt/axsh/redis-bash/redis-bash-cli -h redis-server publish \$(hostname) ready" >> /etc/rc.local
-
+# libraries
+mkdir -p /opt/caquino
+(cd /opt/caquino; git clone https://github.com/caquino/redis-bash.git)
 EOS

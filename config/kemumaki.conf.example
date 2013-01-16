@@ -1,9 +1,14 @@
 LANG=C
 LC_ALL=C
 
+export KEMUMAKI_ENV=shinjuku
+
 # standalone: don't update kemumaki. update vdc
 # jenkins: update kemumaki. don't update vdc unless VDC_BUILD_TARGET is specified
 run_mode=standalone
+
+# set -x if true
+debug=false
 
 kemumaki_repo_url=git://github.com/axsh/kemumaki.git
 kemumaki_branch=master

@@ -8,8 +8,8 @@
 set -e
 set -x
 
-readonly abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
-declare vmimage_base_path=${abs_dirname}/builders/hva/guestroot/var/lib/wakame-vdc/images
+readonly abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+declare vmimage_base_path=${abs_dirname}/vms/hva/guestroot/var/lib/wakame-vdc/images
 declare vmimage_base_uri=http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/vmimage
 
 function deploy_vmimage() {

@@ -13,7 +13,7 @@ metadata
 #nsa
 #sta
 
-hva_services="hva"
+hva_services=(hva hva-worker)
 
 error=
 
@@ -36,7 +36,7 @@ function check(){
   for service in `eval echo \$\{${name}_services[@]\}`
   do
     echo -ne "vdc-${service}\t"
-    status=`ssh root@${ip} -C "initctl status vdc-${service}"`
+    status=`ssh root@${ip} -C "initctl status vdc-${service}" 2>/dev/null`
     status=`echo ${status} | awk '{print $2}' | sed -e 's/,//'`
     echo ${status}
     if [[ -z `echo $status | grep -o 'start/running'` ]]; then
@@ -47,8 +47,8 @@ function check(){
 }
 
 
-check dcmgr 192.168.2.151
-check hva 192.168.2.153
+check dcmgr 10.0.2.15
+check hva 10.0.2.16
 
 if [[ "${error}" = "y" ]]; then
   exit 1

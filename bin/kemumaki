@@ -1,13 +1,5 @@
 #!/bin/bash
 
-LANG=C
-LC_ALL=C
-
-set -e
-set -x
-
-exec > >(tee kemumaki.log) 2>&1
-
 function checkroot() {
   #
   # Check if we're running as root, and bail out if we're not.
@@ -16,13 +8,6 @@ function checkroot() {
     echo "[ERROR] Must run as root." >&2
     return 1
   } || :
-}
-
-function vm_names(){
-  # sort vm names by node_id
-  find ${vm_config_dir} -maxdepth 1 -name '*.conf' | while read file; do
-    echo "${vm_names} $(basename $file | sed -e 's/\.conf//g'):$(grep ^node_id $file | sed -e 's/^node_id=\([0-9]*\)$/\1/')"
-  done | sort -n -t: -k2 | sed -e 's/:[0-9]*$//'
 }
 
 function vdc_build_id(){
@@ -77,50 +62,6 @@ function prepare(){
   fi
 }
 
-function load_config(){
-  [[ ! -f ${config_dir}/kemumaki.conf ]] || . ${config_dir}/kemumaki.conf
-}
-
-function load_node_config(){
-  [[ ! -f ${vm_config_dir}/${name}.conf ]] || . ${vm_config_dir}/${name}.conf
-}
-
-function generate_copy_file(){
-  local vm_name=$1 vm_type=$2
-  [[ -n "${vm_name}" ]] || { echo "[ERROR] Invalid argument: vm_name:${vm_name}" >&2; return 1; }
-  [[ -n "${vm_type}" ]] || { echo "[ERROR] Invalid argument: vm_type:${vm_type}" >&2; return 1; }
-  rm -rf ${tmp_dir}/guestroot
-  cp -a ${vmbuilder_data_dir}/guestroot_common ${tmp_dir}/guestroot
-  cp -af ${vmbuilder_data_dir}/${vm_type}/guestroot ${tmp_dir}/
-  generate_hosts ${vm_name} ${tmp_dir}/guestroot/etc
-
-  (
-    cd ${tmp_dir}/guestroot
-    echo "[INFO](copyfile) Generating copy.txt"
-    find . ! -type d | sed s,^\.,, | egrep -v '^/(.gitkeep|functions.sh)' | while read line; do
-      echo ${tmp_dir}/guestroot${line} ${line}
-    done > ${tmp_dir}/copy.txt
-  )
-  cat ${tmp_dir}/copy.txt
-}
-
-function generate_hosts(){
-  local hostname=$1 dest=$2
-  [[ -n "${hostname}" ]] || { echo "[ERROR] Invalid argument: hostname:${hostname}" >&2; return 1; }
-  [[ -d ${dest} ]] || { echo "[ERROR] Invalid argument: dest:${dest}" >&2; return 1; }
-
-  echo "[INFO](copyfile) Generating hosts"
-
-  cat <<EOS > ${dest}/hosts
-127.0.0.1 localhost
-127.0.0.1 ${hostname}
-EOS
-  [[ -z ${amqp_host} ]] || echo ${amqp_host} amqp-server >> ${dest}/hosts
-  [[ -z ${redis_host} ]] || echo ${redis_host} redis-server >> ${dest}/hosts
-  [[ -z ${vdc_yum_repo_host} ]] || echo ${vdc_yum_repo_host} vdc-yum-repo-server >> ${dest}/hosts
-  cat ${dest}/hosts
-}
-
 function notify(){
   [[ "${hipchat_notification}" = true ]] || return 0
   local message=$1
@@ -148,88 +89,11 @@ function rpmbuild(){
   echo "done: rpmbuild"
 }
 
-function each_vm(){
-  local function_names=($*)
-  for f in ${function_names[*]}; do
-    for name in ${vm_names[*]}; do
-      ($f $name)
-    done
-  done
-}
-
-function check_vm(){
-  for name in ${vm_names[*]}; do
-    [[ "${name}" = $1 ]] && return 0
-  done
-  echo "[ERROR] '${1}' not found in '${vm_config_dir}'"
-  return 1
-}
-
-function build_vm(){
-  local name=$1
-  load_node_config $name
-  local vm_dir=${vmbuilder_data_dir}/${vm_type}
-  local copy=${tmp_dir}/copy.txt
-  local script=${vm_dir}/execscript.sh
-  # TODO versioning
-  local raw_file=${raw_file:-${image_dir}/${name}.raw}
-
-  check_vm ${name} || return 1
-
-  echo "build_vm ${name}"
-
-  generate_copy_file ${name} ${vm_type}
-
-  ${vmbuilder_command} \
-    --hostname=${name} \
-    --rootsize=${rootsize:-8192} \
-    --dns=${dns} \
-    --copy=${copy} \
-    --execscript=${script} \
-    --raw=${raw_file} \
-    --ssh-key=${ssh_key} \
-    --ssh-user-key=${ssh_user_key} \
-    --devel-user=${devel_user} \
-    --nictab=${vm_config_dir}/${name}.nic
-
-  # cleanup known_hosts
-  [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R "${ipaddr}"
-
-  return 0
-}
-
-function start_vm(){
-  local name=$1
-  load_node_config $name
-  local image_path=${raw_file:-${image_dir}/${name}.raw}
-
-  check_vm ${name} || return 1
-
-  echo "start_vm ${name}"
-  
-  ${kvm_ctl_command} start \
-    --name=${name} \
-    --drive="file=${file},media=disk,boot=on,index=0,cache=none" \
-    --image-path=${image_path} \
-    --brname=${brname} \
-    --vnc_port=$((${vnc_port} + ${node_id})) \
-    --monitor_port=$((${monitor_port} + ${node_id})) \
-    --serial_port=$((${serial_port} + ${node_id}))
-
-  ${script_dir}/wait_for_ready.sh -h ${redis_host} ${name}
-}
-
-function stop_vm(){
-  local name=$1
-  load_node_config $name
-  local vifname=${name}
-  check_vm ${name} || return 1
-
-  echo "stop_vm ${name}"
-
-  set +e
-  ${kvm_ctl_command} stop --monitor_port=$((${monitor_port} + ${node_id}))
-  set -e
+function setup(){
+  local setup_dir=${abs_dirname}/setup.${KEMUMAKI_ENV}
+  [[ -d ${setup_dir} ]] || setup_dir=${abs_dirname}/setup
+  echo "setup: ${KEMUMAKI_ENV:-default}"
+  ${setup_dir}/setup.sh $*
 }
 
 function run(){
@@ -239,35 +103,26 @@ function run(){
   done
 }
 
-[[ -n $1 ]] && {
-  command=${1}
-  shift
-}
+LANG=C
+LC_ALL=C
 
-[[ "${command}" = update ]] || checkroot
+set -e
+
+exec > >(tee kemumaki.log) 2>&1
 
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
+function_dir=${abs_dirname}/functions
+config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
+. ${function_dir}/util.sh
+load_config
+set_debug
+
+kemumaki_env=${KEMUMAKI_ENV:-shinjuku}
 script_dir=${abs_dirname}/scripts
-# expand environment variable
-eval config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
 vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
-vm_config_dir=${config_dir}/vms
-vmbuilder_data_dir=${abs_dirname}/builders
 image_dir=${abs_dirname}/images
 tmp_dir=${abs_dirname}/tmp
 rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-vmbuilder_dir=${abs_dirname}/vmbuilder
-vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
-kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
-vnc_port=${vnc_port:-1001}
-monitor_port=${monitor_port:-4444}
-serial_port=${serial_port:-5555}
-brname=${brname:-vboxbr0}
-netmask=${netmask:-255.255.255.0}
-dns=${dns:-8.8.8.8}
-vm_names=$(vm_names)
-
-load_config
 
 # kemumaki
 run_mode=${run_mode:-jenkins}
@@ -285,64 +140,56 @@ vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.
 vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
 vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
 
+[[ -n $1 ]] && {
+  command=${1}
+  shift
+}
+
+[[ "${command}" = update ]] || checkroot
+
 prepare
 
 case ${command} in
-  update)
-    update_kemumaki
+update)
+  update_kemumaki
+  exit 0
+  ;;
+rpmbuild)
+  case $1 in
+  clean)
+    rm -rf ${rpmbuild_tmp_dir}
     exit 0
     ;;
-  rpmbuild)
-    case $1 in
-    clean)
-      rm -rf ${rpmbuild_tmp_dir}
-      exit 0
-      ;;
-    *)
-      [[ -n $1 ]] && {
-        vdc_build_target=$1
-        shift
-      }
-      rpmbuild
-      ;;
-    esac
-    ;;
-  build_vm)
-    if [[ -n "${1}" ]]; then
-      stop_vm $1
-      build_vm $1
-    else
-      each_vm stop_vm build_vm
-    fi
-    ;;
-  start_vm)
-    if [[ -n "${1}" ]]; then
-      start_vm $1
-    else
-      each_vm start_vm
-    fi
-    ;;
-  stop_vm)
-    if [[ -n "${1}" ]]; then
-      stop_vm $1
-    else
-      each_vm stop_vm
-    fi
-    ;;
-  test)
-    run test
-    ;;
-  report)
-    run report
-    ;;
-  all)
+  *)
     [[ -n $1 ]] && {
       vdc_build_target=$1
       shift
     }
     rpmbuild
-    each_vm stop_vm build_vm start_vm
-    run test
-    run report
     ;;
+  esac
+  ;;
+setup)
+  setup $*
+  ;;
+test)
+  run test
+  ;;
+report)
+  run report
+  ;;
+all)
+  [[ -n $1 ]] && {
+    vdc_build_target=$1
+    shift
+  }
+  rpmbuild
+  setup
+  run test
+  run report
+  ;;
+*)
+  echo "[ERROR] no such command: ${command}"
+  exit 1
+  ;;
 esac
