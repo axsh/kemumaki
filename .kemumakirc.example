@@ -1,2 +1,0 @@
-export PATH=$PATH:/opt/hansode/vmbuilder/kvm/rhel/6
-export PATH=$PATH:/opt/caquino/redis-bash
