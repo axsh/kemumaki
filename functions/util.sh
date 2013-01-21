@@ -12,7 +12,6 @@ function checkroot() {
 
 function load_config(){
   [[ ! -f ${config_dir}/kemumaki.conf ]] || . ${config_dir}/kemumaki.conf
-  [[ ! -f ${config_dir}/kemumaki.${KEMUMAKI_ENV}.conf ]] || . ${config_dir}/kemumaki.${KEMUMAKI_ENV}.conf
 }
 
 function set_debug(){

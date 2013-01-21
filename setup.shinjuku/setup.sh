@@ -2,6 +2,10 @@
 
 set -e
 
+function load_setup_config(){
+  [[ ! -f ${setup_dir}/setup.conf ]] || . ${setup_dir}/setup.conf
+}
+
 function load_node_config(){
   local name=$1
   [[ ! -f ${vm_data_dir}/${name}/vm.conf ]] || . ${vm_data_dir}/${name}/vm.conf
@@ -161,16 +165,19 @@ function prepare_vmimage(){
   ${setup_dir}/prepare-vmimage.sh
 }
 
+set -x
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 function_dir=${abs_dirname}/functions
 config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
+setup_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 . ${function_dir}/util.sh
 load_config
+load_setup_config
+set +x
 set_debug
 
 
 kemumaki_env=shinjuku
-setup_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 image_dir=${setup_dir}/images
 vm_data_dir=${setup_dir}/vms
 tmp_dir=${abs_dirname}/tmp/${kemumaki_env}
