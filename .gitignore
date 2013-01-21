@@ -16,3 +16,4 @@ wakame-vdc/*
 *.raw.tar
 *.raw.tar.gz
 *.raw.gz
+pub.pem

@@ -151,6 +151,19 @@ function update_vm(){
   ssh ${ssh_opts} ${ipaddr} /opt/axsh/bin/init_vdc.sh -y
 }
 
+function install_ssh_authorized_keys(){
+  local name=$1
+  check_vm $name
+  load_node_config $name
+  pub_pem_file=${setup_dir}/pub.pem
+  [[ -f ${pub_pem_file} ]] || { echo "[ERROR] File not found: ${pub_pem_file}" >&2; return 1; }
+  key_name=$(cat ${pub_pem_file} | awk '{print $3}')
+  echo "installing ssh authorized_keys to: ${name}"
+  ssh ${ssh_opts} ${ipaddr} grep $key_name ~/.ssh/authorized_keys || {
+    ssh ${ssh_opts} ${ipaddr} "echo $(cat ${pub_pem_file}) >> ~/.ssh/authorized_keys"
+  }
+}
+
 function info_vm(){
   local name=$1
   check_vm $name
@@ -212,7 +225,7 @@ build_vm)
     each_vm stop_vm build_vm
   fi
   ;;
-start_vm|stop_vm|restart_vm|update_vm)
+start_vm|stop_vm|restart_vm|update_vm|install_ssh_authorized_keys)
   if [[ -n "${1}" ]]; then
     ${command} $1
   else
