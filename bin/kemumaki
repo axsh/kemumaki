@@ -97,10 +97,11 @@ function setup(){
 }
 
 function run(){
-  find -L ${abs_dirname}/tests-enabled -type f -name $1 | sort | while read file; do
-    echo running $(basename $(dirname file))
-    ${file}
-  done
+  local mode=$1
+  local name=$2
+  [[ -d "${abs_dirname}/test.${name}" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}" >&2; return 1; }
+  echo "running ${abs_dirname}/test.${name}/${mode}"
+  ${abs_dirname}/test.${name}/${mode}
 }
 
 LANG=C
@@ -172,21 +173,8 @@ rpmbuild)
 setup)
   setup $*
   ;;
-test)
-  run test
-  ;;
-report)
-  run report
-  ;;
-all)
-  [[ -n $1 ]] && {
-    vdc_build_target=$1
-    shift
-  }
-  rpmbuild
-  setup
-  run test
-  run report
+test|report)
+  run ${commond} $1
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
