@@ -3,7 +3,7 @@ set -e
 set -x
 
 function run_mussel(){
-  mussel.sh ${mussel_opts} $*
+  mussel.sh $* ${mussel_opts}
 }
 
 function lsinst() {
@@ -88,7 +88,6 @@ function create() {
   local instance_spec_name=$1
 
   run_mussel ${namespace} create \
-   --host=${dcmgr_host} \
    --image-id=${image_id} \
    --instance-spec-name=${instance_spec_name} \
    --security-groups=${security_groups} \
