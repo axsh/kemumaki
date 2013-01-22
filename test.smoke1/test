@@ -43,11 +43,7 @@ function retry_until() {
       sleep 3
     }
 
-    echo hoge
-    echo $tries
     let ++tries
-    echo piyo
-    echo $tries
     if [[ $(($(date +%s) - ${start_at})) -gt ${wait_sec} ]]; then
       echo "Retry Failure: Exceed ${wait_sec} sec: Retried ${tries} times" >&2
       return 1
