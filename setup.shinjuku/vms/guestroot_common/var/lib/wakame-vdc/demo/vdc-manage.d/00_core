@@ -113,6 +113,10 @@ resourcegroup map nwg-shnet  nw-demo1
 
 keypair add --account-id a-shpoolxx --uuid ssh-demo --private-key=/opt/axsh/wakame-vdc/tests/vdc.sh.d/pri.pem --public-key=/opt/axsh/wakame-vdc/tests/vdc.sh.d/pub.pem --description "demo key1" --service-type std --display-name "demo"
 
+# securitygroup
+
+securitygroup add --uuid sg-aa9j5kqk --account-id a-shpoolxx --description demo --service-type std --display-name "demo" --rule /var/lib/wakame-vdc/demo/securitygroup_rule
+
 # mac address range
 
 macrange add 525400 1 ffffff --uuid mr-demomacs

@@ -1,56 +1,134 @@
-#!/bin/sh
+#!/bin/bash
+set -e
+set -x
 
-dcmgr_services="
-admin
-auth
-proxy
-collector
-webui
-dcmgr
-metadata
-"
-#nwmongw
-#nsa
-#sta
-
-hva_services=(hva hva-worker)
-
-error=
-
-function check(){
-  local name=$1
-  local ip=$2
-
-  echo --------------------
-  echo ${name} services
-  echo --------------------
-
-  echo -n connect to ${ip}...
-  ssh -q root@${ip} -C ":"
-  if [ $? -ne 0 ]; then
-    echo failure
-    return 1
-  fi
-  echo success
-
-  for service in `eval echo \$\{${name}_services[@]\}`
-  do
-    echo -ne "vdc-${service}\t"
-    status=`ssh root@${ip} -C "initctl status vdc-${service}" 2>/dev/null`
-    status=`echo ${status} | awk '{print $2}' | sed -e 's/,//'`
-    echo ${status}
-    if [[ -z `echo $status | grep -o 'start/running'` ]]; then
-      error=y
-    fi
-  done
-  echo 
+function run_mussel(){
+  mussel.sh ${mussel_opts} $*
 }
 
+function lsinst() {
+  # state=(running|stopped|terminated|alive)
+  local state=${1:-running}
+  run_mussel ${namespace} index --state=${state} | grep :id: | awk '{print $3}'
+}
 
-check dcmgr 10.0.2.15
-check hva 10.0.2.16
+function current_inst_num(){
+  lsinst running | wc -l
+}
 
-if [[ "${error}" = "y" ]]; then
-  exit 1
-fi
+function is_max_inst(){
+  cur=$(current_inst_num)
+  echo -n "c:${cur}=${max_inst}? " >&2
+  #[[ ${max_inst} = ${cur} ]]
+  [[ ${max_inst} -le ${cur} ]]
+}
 
+function is_zero_inst(){
+  cur=$(current_inst_num)
+  echo -n "c:${cur}=0? " >&2
+  [[ 0 = ${cur} ]]
+}
+
+function retry_until() {
+  local wait_sec=$1
+  local func=$2
+
+  local tries=0
+  local start_at=$(date +%s)
+
+  while :; do
+    ${func} && {
+      break
+    } || {
+      sleep 3
+    }
+
+    echo hoge
+    echo $tries
+    let ++tries
+    echo piyo
+    echo $tries
+    if [[ $(($(date +%s) - ${start_at})) -gt ${wait_sec} ]]; then
+      echo "Retry Failure: Exceed ${wait_sec} sec: Retried ${tries} times" >&2
+      return 1
+    fi
+  done
+}
+
+function retry_until_max_inst(){
+  retry_until ${retry_wait_sec} is_max_inst
+}
+
+function retry_until_zero_inst(){
+  retry_until ${retry_wait_sec} is_zero_inst
+}
+
+function destroy_all(){
+  do_command_all destroy alive
+  sleep 3
+  retry_until_zero_inst
+  sleep 3
+}
+
+function do_command_all() {
+  local command=$1 state=$2
+  for inst_id in $(lsinst ${state}); do
+    run_mussel ${namespace} ${command} ${inst_id}
+  done
+}
+
+function create_all(){
+  for i in {1..2}; do
+    for inst_spec_name in ${instance_spec_names}; do
+      echo ${inst_spec_name}
+      create ${inst_spec_name}
+    done
+  done
+  retry_until_max_inst
+  sleep 3
+}
+
+function create() {
+  local instance_spec_name=$1
+
+  run_mussel ${namespace} create \
+   --host=${dcmgr_host} \
+   --image-id=${image_id} \
+   --instance-spec-name=${instance_spec_name} \
+   --security-groups=${security_groups} \
+   --ssh-key-id=${ssh_key_id} \
+   --hypervisor=${hypervisor} \
+   --cpu-cores=${cpu_cores} \
+   --memory-size=${memory_size}
+}
+
+function reboot_all(){
+  do_command_all reboot running
+  sleep 6
+  retry_until_max_inst
+  sleep 3
+}
+
+readonly abs_dirname=$(cd $(dirname $0) && pwd)
+readonly namespace=instance
+
+declare image_id=wmi-centos1d
+declare instance_spec_name="vz.small"
+declare instance_spec_names="vz.small vz.large"
+declare security_groups=sg-aa9j5kqk
+declare ssh_key_id=ssh-demo
+declare hypervisor=openvz
+declare cpu_cores=1
+declare memory_size=1024
+
+declare inst_states="
+ running stopped terminated alive
+"
+declare dcmgr_host=10.0.2.15
+declare mussel_opts="--host=${dcmgr_host}"
+declare max_inst=4
+declare retry_wait_sec=$((60 * 30))
+
+destroy_all
+create_all
+reboot_all

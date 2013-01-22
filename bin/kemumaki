@@ -10,6 +10,10 @@ function checkroot() {
   } || :
 }
 
+function update_path(){
+  export PATH=$PATH:${vdc_dir}/client/mussel
+}
+
 function vdc_build_id(){
   cd ${vdc_dir}
   git log -n 1 --pretty=format:"%h"
@@ -49,6 +53,8 @@ function sync_repo(){
 }
 
 function prepare(){
+  update_path
+
   mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
@@ -174,7 +180,7 @@ setup)
   setup $*
   ;;
 test|report)
-  run ${commond} $1
+  run ${command} $1
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
