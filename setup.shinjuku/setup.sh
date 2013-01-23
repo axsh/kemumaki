@@ -210,6 +210,7 @@ vm_names=(dcmgr hva)
 keep_releases=${keep_releases:-5}
 
 mkdir -p ${tmp_dir}
+mkdir -p ${image_dir}
 
 [[ -n $1 ]] && {
   command=${1}

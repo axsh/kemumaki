@@ -55,7 +55,6 @@ function sync_repo(){
 function prepare(){
   update_path
 
-  mkdir -p ${image_dir}
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
 
@@ -127,7 +126,6 @@ set_debug
 kemumaki_env=${KEMUMAKI_ENV:-shinjuku}
 script_dir=${abs_dirname}/scripts
 vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
-image_dir=${abs_dirname}/images
 tmp_dir=${abs_dirname}/tmp
 rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
 
