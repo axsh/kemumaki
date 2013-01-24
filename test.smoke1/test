@@ -132,3 +132,4 @@ retry_wait_sec=$((60 * 30))
 destroy_all
 create_all
 reboot_all
+destroy_all
