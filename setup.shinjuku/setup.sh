@@ -155,13 +155,14 @@ function install_ssh_authorized_keys(){
   local name=$1
   check_vm $name
   load_node_config $name
-  pub_pem_file=${setup_dir}/pub.pem
-  [[ -f ${pub_pem_file} ]] || { echo "[ERROR] File not found: ${pub_pem_file}" >&2; return 1; }
-  key_name=$(cat ${pub_pem_file} | awk '{print $3}')
-  echo "installing ssh authorized_keys to: ${name}"
-  ssh ${ssh_opts} ${ipaddr} grep $key_name ~/.ssh/authorized_keys || {
-    ssh ${ssh_opts} ${ipaddr} "echo $(cat ${pub_pem_file}) >> ~/.ssh/authorized_keys"
-  }
+  local pub_pem_file=
+  find ${setup_dir}/ssh_pub_keys -type f | while read pub_pem_file; do
+    key_name=$(cat ${pub_pem_file} | awk '{print $3}')
+    echo "installing ssh authorized_keys to: ${name}"
+    ssh ${ssh_opts} ${ipaddr} grep $key_name ~/.ssh/authorized_keys || {
+      ssh ${ssh_opts} ${ipaddr} "echo $(cat ${pub_pem_file}) >> ~/.ssh/authorized_keys"
+    }
+  done
 }
 
 function info_vm(){
