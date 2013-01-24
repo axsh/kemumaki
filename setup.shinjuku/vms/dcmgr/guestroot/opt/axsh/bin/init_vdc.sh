@@ -21,6 +21,7 @@ done
 # stop services
 
 initctl stop vdc-collector
+/etc/init.d/rabbitmq-server stop
 
 # update wakame-vdc
 
@@ -69,4 +70,5 @@ find /var/lib/wakame-vdc/demo/gui-manage.d/ -type f | sort | xargs cat | egrep -
 
 # start services
 
+/etc/init.d/rabbitmq-server start
 initctl start vdc-collector
