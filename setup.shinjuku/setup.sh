@@ -40,7 +40,8 @@ function generate_hosts(){
 127.0.0.1 localhost
 127.0.0.1 ${hostname}
 EOS
-  [[ -z ${amqp_host} ]] || echo ${amqp_host} amqp-server >> ${dest}/hosts
+
+  echo ${amqp_host:-${dcmgr_host}} amqp-server >> ${dest}/hosts
   [[ -z ${redis_host} ]] || echo ${redis_host} redis-server >> ${dest}/hosts
   [[ -z ${vdc_yum_repo_host} ]] || echo ${vdc_yum_repo_host} vdc-yum-repo-server >> ${dest}/hosts
   cat ${dest}/hosts
@@ -149,6 +150,8 @@ function update_vm(){
   check_vm $name
   load_node_config $name
   ssh ${ssh_opts} ${ipaddr} /opt/axsh/bin/init_vdc.sh -y
+  sleep 5
+  ${setup_dir}/check_status.sh ${name} ${ipaddr}
 }
 
 function install_ssh_authorized_keys(){
