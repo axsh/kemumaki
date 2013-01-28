@@ -20,7 +20,7 @@ function initialize(){
   vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-  report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-${abs_dirname}/reports}}
+  report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-/var/www/html/reports}}
   
   # kemumaki
   run_mode=${run_mode:-jenkins}

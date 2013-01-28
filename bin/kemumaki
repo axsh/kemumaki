@@ -98,10 +98,15 @@ function run_tests(){
       state="failed"
     }
     result="${result}${t}: ${s}\n"
-    [[ -x "${abs_dirname}/test.${name}/report" ]] && { run_report ${t} ${s}; } || :
+    [[ -x "${abs_dirname}/test.${t}/report" ]] && {
+      sleep 3
+      run_report ${t} ${s}
+    } || :
   done
   echo -e ${result} > ${report_dir}/${vdc_release_id}/summary.md
-  notify "test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})\n${result}"
+  local message="test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
+  [[ ${run_mode} = jenkins ]] && [[ -n ${JENKINS_URL} ]] && { message="${message} report: ${JENKINS_URL%%/jenkins/}/reports/${vdc_release_id}/"; } || :
+  notify ${message}
   echo "test: done"
 }
 
