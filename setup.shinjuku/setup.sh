@@ -191,7 +191,7 @@ function prepare(){
 function reset_ssh_key(){
   local name=${1}
   load_node_config ${name}
-  ssh-keygen -R ${ipaddr}
+  [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R ${ipaddr} || :
 }
 
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)

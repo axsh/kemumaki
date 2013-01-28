@@ -84,6 +84,7 @@ function setup(){
 
 function run_tests(){
   local vdc_release_id=$(vdc_release_id)
+  mkdir -p ${report_dir}/${vdc_release_id}
   echo "test: started"
   notify "test: started> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
   local state="done"

@@ -50,7 +50,7 @@ wakame-vdc test report
  * name: ${name}
  * status: ${test_status}
  * report: ${date}
- * release: ${release}
+ * release: ${vdc_release_id}
  * repo_uri: $(vdc_origin_url)
  * branch: ${vdc_branch}
 
@@ -86,9 +86,8 @@ function_dir=${abs_dirname}/functions
 
 test_name=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd | sed -e 's/.*\/test\.\(.*\)/\1/')
 test_status=${1}
-release=$(vdc_release_id)
-mkdir -p ${report_dir}/${release}
-report_file=${report_dir}/${release}/${test_name}.md
+vdc_release_id=$(vdc_release_id)
+report_file=${report_dir}/${vdc_release_id}/${test_name}.md
 
 report
 

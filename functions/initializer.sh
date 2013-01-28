@@ -20,7 +20,7 @@ function initialize(){
   vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-  report_dir=${abs_dirname}/reports
+  report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-${abs_dirname}/reports}}
   
   # kemumaki
   run_mode=${run_mode:-jenkins}
@@ -36,7 +36,7 @@ function initialize(){
   # vdc
   vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.git}}
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
-  vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
+  vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
 
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
