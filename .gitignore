@@ -17,3 +17,6 @@ wakame-vdc/*
 *.raw.tar.gz
 *.raw.gz
 */ssh_pub_keys/*
+
+# reports
+reports/*

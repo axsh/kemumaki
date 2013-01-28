@@ -10,10 +10,18 @@ function checkroot() {
   } || :
 }
 
-function load_config(){
-  [[ ! -f ${config_dir}/kemumaki.conf ]] || . ${config_dir}/kemumaki.conf
+function run_ssh(){
+  ssh ${ssh_opts} $*
 }
 
-function set_debug(){
-  [[ ${KEMUMAKI_DEBUG:-${debug}} = true ]] && set -x || :
+function vdc_build_id(){
+  (cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
+}
+
+function vdc_release_id(){
+  (cd ${vdc_dir} && ./rpmbuild/helpers/gen-release-id.sh)
+}
+
+function vdc_origin_url(){
+  (cd ${vdc_dir} && git config --get remote.origin.url)
 }

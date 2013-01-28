@@ -105,10 +105,7 @@ function reboot_all(){
 
 abs_dirname=$(cd $(dirname $0)/../ && pwd)
 function_dir=${abs_dirname}/functions
-config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-. ${function_dir}/util.sh
-load_config
-set_debug
+. ${function_dir}/initializer.sh
 
 namespace=instance
 image_id=wmi-centos1d
@@ -127,7 +124,7 @@ dcmgr_host=${DCMGR_HOST:-${dcmgr_host:-10.0.2.15}}
 dcmgr_port=${DCMGR_PORT:-${dcmgr_port:-9001}}
 mussel_opts="--host=${dcmgr_host} --port=${dcmgr_port}"
 max_inst=4
-retry_wait_sec=$((60 * 30))
+retry_wait_sec=$((60 * 5))
 
 destroy_all
 create_all

@@ -14,21 +14,6 @@ function update_path(){
   export PATH=$PATH:${vdc_dir}/client/mussel
 }
 
-function vdc_build_id(){
-  cd ${vdc_dir}
-  git log -n 1 --pretty=format:"%h"
-}
-
-function vdc_release_id(){
-  cd ${vdc_dir}
-  ./rpmbuild/helpers/gen-release-id.sh
-}
-
-function vdc_origin_url(){
-  cd ${vdc_dir}
-  git config --get remote.origin.url
-}
-
 function update_vdc(){
   sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
 }
@@ -55,9 +40,6 @@ function sync_repo(){
 function prepare(){
   update_path
 
-  mkdir -p ${tmp_dir}
-  mkdir -p ${rpmbuild_tmp_dir}
-
   if [[ "${run_mode}" = standalone ]]; then
     [[ -d ${vdc_dir} ]] || {
       ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir}) )
@@ -77,12 +59,11 @@ function notify(){
 
 function notify_rpmbuild(){
   local state=${1:-unknown}
-  local release_id=$(vdc_release_id)
-  notify "rpmbuild: ${state}> ${vdc_branch} of ${vdc_repo_url} (${release_id})"
+  notify "rpmbuild: ${state}> ${vdc_branch} of ${vdc_repo_url} ($(vdc_release_id))"
 }
 
 function rpmbuild(){
-  echo "start rpmbuild"
+  echo "rpmbuild: started"
   [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   notify_rpmbuild started
   trap "notify_rpmbuild failed && return 1" ERR
@@ -91,7 +72,7 @@ function rpmbuild(){
   ./spot-build.sh ${vdc_dir}
   trap ERR
   notify_rpmbuild done
-  echo "done: rpmbuild"
+  echo "rpmbuild: done"
 }
 
 function setup(){
@@ -101,12 +82,41 @@ function setup(){
   ${setup_dir}/setup.sh $*
 }
 
-function run(){
-  local mode=$1
-  local name=$2
-  [[ -d "${abs_dirname}/test.${name}" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}" >&2; return 1; }
-  echo "running ${abs_dirname}/test.${name}/${mode}"
-  ${abs_dirname}/test.${name}/${mode}
+function run_tests(){
+  local vdc_release_id=$(vdc_release_id)
+  echo "test: started"
+  notify "test: started> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
+  local state="done"
+  local result=
+  local t=
+  for t in $*; do
+    local s="success"
+    run_test ${t}
+    [[ $? -eq 0 ]] || {
+      s="failure"
+      state="failed"
+    }
+    result="${result}${t}: ${s}\n"
+    [[ -x "${abs_dirname}/test.${name}/report" ]] && { run_report ${t} ${s}; } || :
+  done
+  echo -e ${result} > ${report_dir}/${vdc_release_id}/summary.md
+  notify "test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})\n${result}"
+  echo "test: done"
+}
+
+function run_test(){
+  local name=${1}
+  [[ -f "${abs_dirname}/test.${name}/test" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}/test" >&2; return 1; }
+  echo "testing ${abs_dirname}/test.${name}/test"
+  ${abs_dirname}/test.${name}/test
+}
+
+function run_report(){
+  local name=${1}
+  [[ -f "${abs_dirname}/test.${name}/report" ]] || { echo "[ERROR] Report not found: ${abs_dirname}/test.${name}/report" >&2; return 1; }
+  local test_status=${2}
+  echo "reporting ${abs_dirname}/test.${name}/report"
+  ${abs_dirname}/test.${name}/report ${test_status}
 }
 
 LANG=C
@@ -118,32 +128,7 @@ exec > >(tee kemumaki.log) 2>&1
 
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 function_dir=${abs_dirname}/functions
-config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-. ${function_dir}/util.sh
-load_config
-set_debug
-
-kemumaki_env=${KEMUMAKI_ENV:-shinjuku}
-script_dir=${abs_dirname}/scripts
-vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
-tmp_dir=${abs_dirname}/tmp
-rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-
-# kemumaki
-run_mode=${run_mode:-jenkins}
-kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
-kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
-
-# hipchat
-hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
-hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-}}
-hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-}}
-hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-}}
-
-# vdc
-vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.git}}
-vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
-vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
+. ${function_dir}/initializer.sh
 
 [[ -n $1 ]] && {
   command=${1}
@@ -177,8 +162,8 @@ rpmbuild)
 setup)
   setup $*
   ;;
-test|report)
-  run ${command} $1
+test)
+  run_tests $*
   ;;
 *)
   echo "[ERROR] no such command: ${command}"

@@ -14,6 +14,11 @@ debug=false
 dcmgr_host=10.0.2.15
 dcmgr_port=9001
 
+# mysql settings
+mysql_host=${dcmgr_host}
+mysql_user=root
+mysql_database=wakame_dcmgr
+
 kemumaki_repo_url=git://github.com/axsh/kemumaki.git
 kemumaki_branch=master
 
@@ -25,3 +30,6 @@ hipchat_notification=false
 hipchat_token=
 hipchat_room_id=
 hipchat_from_name=kemumaki
+
+#ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ssh_opts="-o StrictHostKeyChecking=no"

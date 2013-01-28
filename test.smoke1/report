@@ -1,0 +1,95 @@
+#!/bin/bash
+
+set -e
+
+function run_query(){
+  local query=${1}
+  cat <<EOS | run_ssh ${mysql_host} mysql -u${mysql_user} ${mysql_database}
+${query}
+EOS
+}
+
+function vdc_info(){
+  cat <<'EOS' | run_ssh ${dcmgr_host}
+rpm -q --qf '%{NAME} %{Version} %{Release}\n' wakame-vdc
+EOS
+}
+
+function instance_states(){
+  run_query "select state, count(state) from instances group by state;" | tail -n +2
+}
+
+function job_states(){
+  run_query "select state, count(state) from job_states group by state;" | tail -n +2
+}
+
+function job_info_by_state(){
+  local state=${1}
+  run_query "select * from job_states where state = '${state}';" | awk -F, '{print $1,$2,$3,$4,$12}'
+}
+
+function md_table(){
+  while read line; do
+    echo "${line}" | sed -e 's/^[ \t]\+//' -e 's/[ \t]\+$//' -e 's/[ \t]\+/ | /g' -e "s/\(.*\)/| \1 |/"
+  done
+}
+
+function md_pre(){
+  cat | sed "s/^/    /"
+EOS
+}
+
+function report(){
+  local date=$(date '+%Y%m%d %H:%M:%S')
+  local instance_states=$(instance_states | md_table)
+  local job_states=$(job_states | md_table)
+
+cat <<EOS > ${report_file}
+wakame-vdc test report
+======================
+ * name: ${name}
+ * status: ${test_status}
+ * report: ${date}
+ * release: ${release}
+ * repo_uri: $(vdc_origin_url)
+ * branch: ${vdc_branch}
+
+instances
+---------
+
+| state | count |
+| :---- | ----: |
+${instance_states}
+
+jobs
+----
+
+| state | count |
+| :---- | ----: |
+${job_states}
+
+running jobs
+------------
+
+${running_jobs}
+
+failed jobs
+-----------
+
+${failed_jobs}
+EOS
+}
+
+abs_dirname=$(cd $(dirname $0)/../ && pwd)
+function_dir=${abs_dirname}/functions
+. ${function_dir}/initializer.sh
+
+test_name=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd | sed -e 's/.*\/test\.\(.*\)/\1/')
+test_status=${1}
+release=$(vdc_release_id)
+mkdir -p ${report_dir}/${release}
+report_file=${report_dir}/${release}/${test_name}.md
+
+report
+
+cat ${report_file}
