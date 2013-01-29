@@ -102,7 +102,7 @@ function run_tests(){
     [[ -x "${abs_dirname}/test.${t}/report" ]] && {
       sleep 3
       run_report ${t} ${s}
-    } || :
+    }
   done
   echo -e ${result} > ${report_dir}/${vdc_release_id}/summary.md
   local message="test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"

@@ -43,6 +43,8 @@ function report(){
   local date=$(date '+%Y%m%d %H:%M:%S')
   local instance_states=$(instance_states | md_table)
   local job_states=$(job_states | md_table)
+  local running_jobs=$(job_info_by_state "running" | md_pre)
+  local failed_jobs=$(job_info_by_state "failed" | md_pre)
 
 cat <<EOS > ${report_file}
 wakame-vdc test report
