@@ -130,7 +130,7 @@ function start_vm(){
     --monitor_port=$((${monitor_port} + ${node_id})) \
     --serial_port=$((${serial_port} + ${node_id}))
 
-  ${script_dir}/wait_for_ready.sh -h ${redis_host} ${name}
+  ${lib_dir}/wait_for_ready.sh -h ${redis_host} ${name}
 }
 
 function stop_vm(){
@@ -194,9 +194,7 @@ function reset_ssh_key(){
   [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R ${ipaddr} || :
 }
 
-abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
-function_dir=${abs_dirname}/functions
-. ${function_dir}/initializer.sh
+. $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 setup_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 load_setup_config
@@ -247,7 +245,6 @@ list_vm|prepare_vmimage)
   ${command}
   ;;
 *)
-  echo "[ERROR] no such command: ${command}"
-  exit 1
+  each_vm update_vm
   ;;
 esac

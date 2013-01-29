@@ -103,9 +103,7 @@ function reboot_all(){
   sleep 3
 }
 
-abs_dirname=$(cd $(dirname $0)/../ && pwd)
-function_dir=${abs_dirname}/functions
-. ${function_dir}/initializer.sh
+. $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 namespace=instance
 image_id=wmi-centos1d

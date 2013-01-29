@@ -9,14 +9,14 @@ function set_debug(){
 }
 
 function initialize(){
-  function_dir=${abs_dirname}/functions
+  abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
+  lib_dir=${abs_dirname}/lib
   config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-  . ${function_dir}/util.sh
+  . ${lib_dir}/util.sh
   load_config
   set_debug
 
   kemumaki_env=${KEMUMAKI_ENV:-shinjuku}
-  script_dir=${abs_dirname}/scripts
   vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild

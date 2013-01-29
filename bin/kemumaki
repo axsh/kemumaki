@@ -54,7 +54,7 @@ function notify(){
   local message=$1
   # add jenkins build url
   [[ -z ${BUILD_URL} ]] || message="${BUILD_URL} ${message}"
-  echo -e "${message} " | ${script_dir}/hipchat_room_message -t ${hipchat_token} -r ${hipchat_room_id} -f ${hipchat_from_name}
+  echo -e "${message} " | ${lib_dir}/hipchat_room_message -t ${hipchat_token} -r ${hipchat_room_id} -f ${hipchat_from_name}
 }
 
 function notify_rpmbuild(){
@@ -67,7 +67,7 @@ function rpmbuild(){
   [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   notify_rpmbuild started
   trap "notify_rpmbuild failed && return 1" ERR
-  cd ${script_dir}
+  cd ${lib_dir}
   ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh ${vdc_dir}
   trap ERR
@@ -83,6 +83,7 @@ function setup(){
 }
 
 function run_tests(){
+  [[ $# -ge 1 ]] || { echo "[ERROR] At least one test name must be specified." >&2; return 1; }
   local vdc_release_id=$(vdc_release_id)
   mkdir -p ${report_dir}/${vdc_release_id}
   echo "test: started"
@@ -112,14 +113,14 @@ function run_tests(){
 
 function run_test(){
   local name=${1}
-  [[ -f "${abs_dirname}/test.${name}/test" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}/test" >&2; return 1; }
+  [[ -x "${abs_dirname}/test.${name}/test" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}/test" >&2; return 1; }
   echo "testing ${abs_dirname}/test.${name}/test"
   ${abs_dirname}/test.${name}/test
 }
 
 function run_report(){
   local name=${1}
-  [[ -f "${abs_dirname}/test.${name}/report" ]] || { echo "[ERROR] Report not found: ${abs_dirname}/test.${name}/report" >&2; return 1; }
+  [[ -x "${abs_dirname}/test.${name}/report" ]] || { echo "[ERROR] Report not found: ${abs_dirname}/test.${name}/report" >&2; return 1; }
   local test_status=${2}
   echo "reporting ${abs_dirname}/test.${name}/report"
   ${abs_dirname}/test.${name}/report ${test_status}
@@ -132,9 +133,7 @@ set -e
 
 exec > >(tee kemumaki.log) 2>&1
 
-abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
-function_dir=${abs_dirname}/functions
-. ${function_dir}/initializer.sh
+. $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 [[ -n $1 ]] && {
   command=${1}

@@ -80,9 +80,7 @@ ${failed_jobs}
 EOS
 }
 
-abs_dirname=$(cd $(dirname $0)/../ && pwd)
-function_dir=${abs_dirname}/functions
-. ${function_dir}/initializer.sh
+. $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 test_name=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd | sed -e 's/.*\/test\.\(.*\)/\1/')
 test_status=${1}
