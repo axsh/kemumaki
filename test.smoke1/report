@@ -84,7 +84,12 @@ EOS
 
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
-test_name=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd | sed -e 's/.*\/test\.\(.*\)/\1/')
+base_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+test_name=$(echo ${base_dir} | sed -e 's/.*\/test\.\(.*\)/\1/')
+. ${base_dir}/config
+config_file=$(eval echo '$KEMUMAKI_TEST_CONFIG_'${test_name})
+[[ -f ${config_file} ]] && . ${config_file}
+
 test_status=${1}
 vdc_release_id=$(vdc_release_id)
 report_file=${report_dir}/${vdc_release_id}/${test_name}.md

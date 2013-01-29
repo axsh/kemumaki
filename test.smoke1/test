@@ -103,17 +103,34 @@ function reboot_all(){
   sleep 3
 }
 
+function set_instance_spec(){
+  local hypervisor=$1
+  case ${hypervisor} in
+  kvm) instance_spec_prefix=kvm  ;;
+  openvz) instance_spec_prefix=vz  ;;
+  lxc) instance_spec_prefix=lxc  ;;
+  esac
+
+  instance_spec_name="${instance_spec_prefix}.small"
+  instance_spec_names="${instance_spec_prefix}.small ${instance_spec_prefix}.large"
+}
+
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
+base_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+test_name=$(echo ${base_dir} | sed -e 's/.*\/test\.\(.*\)/\1/')
+. ${base_dir}/config
+config_file=$(eval echo '$KEMUMAKI_TEST_CONFIG_'$(uppercase ${test_name}))
+[[ -f ${config_file} ]] && . ${config_file}
+
 namespace=instance
-image_id=wmi-centos1d
-instance_spec_name="vz.small"
-instance_spec_names="vz.small vz.large"
-security_groups=sg-aa9j5kqk
-ssh_key_id=ssh-demo
-hypervisor=openvz
-cpu_cores=1
-memory_size=1024
+image_id=${image_id:-wmi-centos1d}
+hypervisor=${hypervisor:-openvz}
+security_groups=${security_groups:-sg-aa9j5kqk}
+ssh_key_id=${ssh_key_id:-ssh-demo}
+cpu_cores=${cpu_cores:-1}
+memory_size=${memory_size:-1024}
+set_instance_spec $hypervisor
 
 inst_states="
  running stopped terminated alive
