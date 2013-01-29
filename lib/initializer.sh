@@ -38,6 +38,8 @@ function initialize(){
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
   vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
 
+  ssh_opts=${ssh_opts:-"-o StrictHostKeyChecking=no"}
+
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${report_dir}
