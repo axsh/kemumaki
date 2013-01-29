@@ -22,8 +22,18 @@ function initialize(){
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
   report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-/var/www/html/reports}}
   
-  # kemumaki
   run_mode=${run_mode:-jenkins}
+
+  # dcmgr settings
+  dcmgr_host=${DCMGR_HOST:-${dcmgr_host:-10.0.2.15}}
+  dcmgr_port=${DCMGR_PORT:-${dcmgr_port:-9001}}
+
+  # mysql settings
+  mysql_host=${mysql_host:-${dcmgr_host}}
+  mysql_user=${mysql_user:-root}
+  mysql_database=${mysql_database:-wakame_dcmgr}
+
+  # kemumaki
   kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
   kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
   

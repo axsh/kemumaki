@@ -118,8 +118,6 @@ memory_size=1024
 inst_states="
  running stopped terminated alive
 "
-dcmgr_host=${DCMGR_HOST:-${dcmgr_host:-10.0.2.15}}
-dcmgr_port=${DCMGR_PORT:-${dcmgr_port:-9001}}
 mussel_opts="--host=${dcmgr_host} --port=${dcmgr_port}"
 max_inst=4
 retry_wait_sec=$((60 * 5))
