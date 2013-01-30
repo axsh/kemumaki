@@ -109,6 +109,15 @@ function run(){
   ${abs_dirname}/test.${name}/${mode}
 }
 
+function vmapp(){
+  local dist_name=$1
+  local dest_dir=$2
+  [[ -n ${dist_name} ]] || dist_name=${vmapp_suite}
+  [[ -n ${dest_dir} ]] || dest_dir=${vmapp_deploy_dir} 
+  [[ -d ${vdc_dir} ]] || { echo "[ERROR] vdc_dir not found: ${vdc_dir}" >&2; return 1; }
+  ${vdc_dir}/vmapp/build.sh "${dist_name}" "${dest_dir}" 
+}
+
 LANG=C
 LC_ALL=C
 
@@ -145,6 +154,10 @@ vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.
 vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
 vdc_dir=${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}
 
+# vmapp
+vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
+vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-centos6}}
+
 [[ -n $1 ]] && {
   command=${1}
   shift
@@ -179,6 +192,9 @@ setup)
   ;;
 test|report)
   run ${command} $1
+  ;;
+vmapp)
+  vmapp $*
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
