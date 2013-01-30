@@ -144,10 +144,6 @@ exec > >(tee kemumaki.log) 2>&1
 
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
-# vmapp
-vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
-vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-centos6}}
-
 [[ -n $1 ]] && {
   command=${1}
   shift
