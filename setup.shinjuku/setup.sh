@@ -130,7 +130,7 @@ function start_vm(){
     --monitor_port=$((${monitor_port} + ${node_id})) \
     --serial_port=$((${serial_port} + ${node_id}))
 
-  ${script_dir}/wait_for_ready.sh -h ${redis_host} ${name}
+  ${lib_dir}/wait_for_ready.sh -h ${redis_host} ${name}
 }
 
 function stop_vm(){
@@ -149,7 +149,7 @@ function update_vm(){
   local name=$1
   check_vm $name
   load_node_config $name
-  ssh ${ssh_opts} ${ipaddr} /opt/axsh/bin/init_vdc.sh -y
+  run_ssh ${ipaddr} /opt/axsh/bin/init_vdc.sh -y
   sleep 5
   ${setup_dir}/check_status.sh ${name} ${ipaddr}
 }
@@ -162,8 +162,8 @@ function install_ssh_authorized_keys(){
   find ${setup_dir}/ssh_pub_keys -type f | while read pub_pem_file; do
     key_name=$(cat ${pub_pem_file} | awk '{print $3}')
     echo "installing ssh authorized_keys to: ${name}"
-    ssh ${ssh_opts} ${ipaddr} grep $key_name ~/.ssh/authorized_keys || {
-      ssh ${ssh_opts} ${ipaddr} "echo $(cat ${pub_pem_file}) >> ~/.ssh/authorized_keys"
+    run_ssh ${ipaddr} grep $key_name ~/.ssh/authorized_keys || {
+      run_ssh ${ipaddr} "echo $(cat ${pub_pem_file}) >> ~/.ssh/authorized_keys"
     }
   done
 }
@@ -182,27 +182,29 @@ function prepare_vmimage(){
   ${setup_dir}/prepare-vmimage.sh
 }
 
-set -x
-abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
-function_dir=${abs_dirname}/functions
-config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
+function prepare(){
+  mkdir -p ${tmp_dir}
+  mkdir -p ${image_dir}
+  each_vm reset_ssh_key
+}
+
+function reset_ssh_key(){
+  local name=${1}
+  load_node_config ${name}
+  [[ -f ~/.ssh/known_hosts ]] && ssh-keygen -R ${ipaddr} || :
+}
+
+. $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
+
 setup_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
-. ${function_dir}/util.sh
-load_config
 load_setup_config
-set +x
-set_debug
 
-
-kemumaki_env=shinjuku
 image_dir=${setup_dir}/images
 vm_data_dir=${setup_dir}/vms
 tmp_dir=${abs_dirname}/tmp/${kemumaki_env}
-script_dir=${abs_dirname}/scripts
 vmbuilder_dir=${abs_dirname}/vmbuilder
 vmbuilder_command=${vmbuilder_dir}/kvm/rhel/6/vmbuilder.sh
 kvm_ctl_command=${vmbuilder_dir}/kvm/rhel/6/misc/kvm-ctl.sh
-ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 vnc_port=${vnc_port:-1001}
 monitor_port=${monitor_port:-4444}
@@ -213,8 +215,7 @@ dns=${dns:-8.8.8.8}
 vm_names=(dcmgr hva)
 keep_releases=${keep_releases:-5}
 
-mkdir -p ${tmp_dir}
-mkdir -p ${image_dir}
+prepare
 
 [[ -n $1 ]] && {
   command=${1}
@@ -244,7 +245,6 @@ list_vm|prepare_vmimage)
   ${command}
   ;;
 *)
-  echo "[ERROR] no such command: ${command}"
-  exit 1
+  each_vm update_vm
   ;;
 esac

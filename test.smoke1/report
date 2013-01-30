@@ -1,0 +1,98 @@
+#!/bin/bash
+
+set -e
+
+function run_query(){
+  local query=${1}
+  cat <<EOS | run_ssh ${mysql_host} mysql -u${mysql_user} ${mysql_database}
+${query}
+EOS
+}
+
+function vdc_info(){
+  cat <<'EOS' | run_ssh ${dcmgr_host}
+rpm -q --qf '%{NAME} %{Version} %{Release}\n' wakame-vdc
+EOS
+}
+
+function instance_states(){
+  run_query "select state, count(state) from instances group by state;" | tail -n +2
+}
+
+function job_states(){
+  run_query "select state, count(state) from job_states group by state;" | tail -n +2
+}
+
+function job_info_by_state(){
+  local state=${1}
+  run_query "select * from job_states where state = '${state}';" | awk -F, '{print $1,$2,$3,$4,$12}'
+}
+
+function md_table(){
+  while read line; do
+    echo "${line}" | sed -e 's/^[ \t]\+//' -e 's/[ \t]\+$//' -e 's/[ \t]\+/ | /g' -e "s/\(.*\)/| \1 |/"
+  done
+}
+
+function md_pre(){
+  cat | sed "s/^/    /"
+}
+
+function report(){
+  local date=$(date '+%Y%m%d %H:%M:%S')
+  local instance_states=$(instance_states | md_table)
+  local job_states=$(job_states | md_table)
+  local running_jobs=$(job_info_by_state "running" | md_pre)
+  local failed_jobs=$(job_info_by_state "failed" | md_pre)
+
+cat <<EOS > ${report_file}
+wakame-vdc test report
+======================
+ * name: ${name}
+ * status: ${test_status}
+ * report: ${date}
+ * release: ${vdc_release_id}
+ * repo_uri: $(vdc_origin_url)
+ * branch: ${vdc_branch}
+
+instances
+---------
+
+| state | count |
+| :---- | ----: |
+${instance_states}
+
+jobs
+----
+
+| state | count |
+| :---- | ----: |
+${job_states}
+
+running jobs
+------------
+
+${running_jobs}
+
+failed jobs
+-----------
+
+${failed_jobs}
+EOS
+}
+
+. $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
+
+base_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+test_name=$(echo ${base_dir} | sed -e 's/.*\/test\.\(.*\)/\1/')
+. ${base_dir}/config
+config_file=$(eval echo '$KEMUMAKI_TEST_CONFIG_'${test_name})
+[[ -f ${config_file} ]] && . ${config_file}
+
+test_status=${1}
+vdc_release_id=$(vdc_release_id)
+report_file=${report_dir}/${vdc_release_id}/${test_name}.md
+
+report
+
+cat ${report_file}
