@@ -135,6 +135,15 @@ function vmapp(){
   ${vdc_dir}/vmapp/build.sh "${dist_name}" "${dest_dir}" 
 }
 
+function vmapp(){
+  local dist_name=$1
+  local dest_dir=$2
+  [[ -n ${dist_name} ]] || dist_name=${vmapp_suite}
+  [[ -n ${dest_dir} ]] || dest_dir=${vmapp_deploy_dir} 
+  [[ -d ${vdc_dir} ]] || { echo "[ERROR] vdc_dir not found: ${vdc_dir}" >&2; return 1; }
+  ${vdc_dir}/vmapp/build.sh "${dist_name}" "${dest_dir}" 
+}
+
 LANG=C
 LC_ALL=C
 
@@ -143,6 +152,10 @@ set -e
 exec > >(tee kemumaki.log) 2>&1
 
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
+
+# vmapp
+vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
+vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-centos6}}
 
 [[ -n $1 ]] && {
   command=${1}
@@ -178,6 +191,9 @@ setup)
   ;;
 test)
   run_tests $*
+  ;;
+vmapp)
+  vmapp $*
   ;;
 vmapp)
   vmapp $*
