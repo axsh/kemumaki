@@ -4,11 +4,14 @@ set -e
 
 function load_setup_config(){
   [[ ! -f ${setup_dir}/setup.conf ]] || . ${setup_dir}/setup.conf
+  [[ ! -f ${setup_dir}/setup.${shinjuku_env}.conf ]] || . ${setup_dir}/setup.${shinjuku_env}.conf
 }
 
 function load_node_config(){
   local name=$1
   [[ ! -f ${vm_data_dir}/${name}/vm.conf ]] || . ${vm_data_dir}/${name}/vm.conf
+  ipaddr=$(eval echo \${${name}_host})
+  node_id=$((node_id_begin + node_id_index))
 }
 
 function generate_copy_file(){
@@ -47,6 +50,26 @@ EOS
   cat ${dest}/hosts
 }
 
+function generate_nictabs(){
+  generate_dcmgr_nictab
+  generate_hva_nictab
+}
+
+function generate_dcmgr_nictab(){
+  local target_file=${tmp_dir}/dcmgr.nictab
+  cat <<EOS > ${target_file}
+ifname=eth0 ip=${dcmgr_host} mask=${vm_netmask} net=${vm_network} bcast=${vm_broadcast} gw=${vm_gateway}
+EOS
+}
+
+function generate_hva_nictab(){
+  local target_file=${tmp_dir}/hva.nictab
+  cat <<EOS > ${target_file}
+ifname=eth0 bridge=br0
+ifname=br0 ip=${hva_host} mask=${vm_netmask} net=${vm_network} bcast=${vm_broadcast} gw=${vm_gateway} iftype=bridge
+EOS
+}
+
 function check_vm(){
   for name in ${vm_names[*]}; do
     [[ "${name}" = $1 ]] && return 0
@@ -70,20 +93,23 @@ function build_vm(){
   load_node_config $name
   local vm_dir=${vm_data_dir}/${name}
   local copy=${tmp_dir}/copy.txt
+  local nictab=${tmp_dir}/${name}.nictab
   local script=${vm_dir}/execscript.sh
-  # TODO versioning
 
   echo "build_vm ${name}"
 
   local version=1
   local arch=$(arch)
-  local raw_file=${image_dir}/${name}.$(date +%Y%m%d).$(printf "%02d" ${version}).${arch}.raw
-  while [[ -f ${raw_file} ]]; do
+  local raw_file_name=${name}.$(date +%Y%m%d).$(printf "%02d" ${version}).${arch}.raw
+  local raw_file_path=${image_dir}/${raw_file_name}
+  while [[ -f ${raw_file_path} ]]; do
     version=$((${version} + 1))
-    raw_file=${image_dir}/${name}.$(date +%Y%m%d).$(printf "%02d" ${version}).${arch}.raw
+    raw_file_name=${name}.$(date +%Y%m%d).$(printf "%02d" ${version}).${arch}.raw
+    raw_file_path=${image_dir}/${raw_file_name}
   done
 
   generate_copy_file ${name}
+  generate_${name}_nictab
 
   ${vmbuilder_command} \
     --hostname=${name} \
@@ -91,14 +117,17 @@ function build_vm(){
     --dns=${dns} \
     --copy=${copy} \
     --execscript=${script} \
-    --raw=${raw_file} \
+    --raw=${raw_file_path} \
     --ssh-key=${ssh_key} \
     --ssh-user-key=${ssh_user_key} \
     --devel-user=${devel_user} \
-    --nictab=${vm_data_dir}/${name}/vm.nictab
+    --nictab=${nictab}
 
   echo "[INFO] Modify symlink"
-  ln -sf ${raw_file} ${image_dir}/${name}.raw
+  (
+    cd ${image_dir}
+    ln -sf ${raw_file_name} ${name}.raw
+  )
 
   local num=$(ls ${image_dir}/${name}.*.raw | wc -l) 
   [[ ${num} -le ${keep_releases} ]] || {
@@ -197,9 +226,10 @@ function reset_ssh_key(){
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 setup_dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+shinjuku_env=${SHINJUKU_ENV:-${shinjuku_env:-production}}
 load_setup_config
 
-image_dir=${setup_dir}/images
+image_dir=${setup_dir}/images/${shinjuku_env}
 vm_data_dir=${setup_dir}/vms
 tmp_dir=${abs_dirname}/tmp/${kemumaki_env}
 vmbuilder_dir=${abs_dirname}/vmbuilder
@@ -210,7 +240,6 @@ vnc_port=${vnc_port:-1001}
 monitor_port=${monitor_port:-4444}
 serial_port=${serial_port:-5555}
 brname=${brname:-vboxbr0}
-netmask=${netmask:-255.255.255.0}
 dns=${dns:-8.8.8.8}
 vm_names=(dcmgr hva)
 keep_releases=${keep_releases:-5}
@@ -241,7 +270,7 @@ start_vm|stop_vm|restart_vm|update_vm|install_ssh_authorized_keys)
 info_vm)
   ${command} $1
   ;;
-list_vm|prepare_vmimage)
+generate_nictabs|list_vm|prepare_vmimage)
   ${command}
   ;;
 *)
