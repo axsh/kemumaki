@@ -48,6 +48,10 @@ function initialize(){
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
   vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
 
+  # vmapp
+  vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
+  vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-centos6}}
+
   ssh_opts=${ssh_opts:-"-o StrictHostKeyChecking=no"}
 
   mkdir -p ${tmp_dir}
