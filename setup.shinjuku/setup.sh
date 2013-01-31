@@ -21,6 +21,7 @@ function generate_copy_file(){
   cp -a ${vm_data_dir}/guestroot_common ${tmp_dir}/guestroot
   cp -af ${vm_data_dir}/${name}/guestroot ${tmp_dir}/
   generate_hosts ${name} ${tmp_dir}/guestroot/etc
+  update_repo_file
 
   (
     cd ${tmp_dir}/guestroot
@@ -60,6 +61,7 @@ function generate_dcmgr_nictab(){
   cat <<EOS > ${target_file}
 ifname=eth0 ip=${dcmgr_host} mask=${vm_netmask} net=${vm_network} bcast=${vm_broadcast} gw=${vm_gateway}
 EOS
+  cat ${target_file}
 }
 
 function generate_hva_nictab(){
@@ -68,6 +70,13 @@ function generate_hva_nictab(){
 ifname=eth0 bridge=br0
 ifname=br0 ip=${hva_host} mask=${vm_netmask} net=${vm_network} bcast=${vm_broadcast} gw=${vm_gateway} iftype=bridge
 EOS
+  cat ${target_file}
+}
+
+function update_repo_file(){
+  local dest=${1:-${tmp_dir}/guestroot/etc/yum.repos.d/wakame-vdc.repo}
+  sed -i "s,^baseurl=.*$,baseurl=http://vdc-yum-repo-server/${vdc_yum_repo_url_path_prefix}/current," ${dest}
+  cat ${dest}
 }
 
 function check_vm(){
@@ -243,6 +252,7 @@ brname=${brname:-vboxbr0}
 dns=${dns:-8.8.8.8}
 vm_names=(dcmgr hva)
 keep_releases=${keep_releases:-5}
+vdc_yum_repo_url_path_prefix=${vdc_yum_repo_url_path_prefix:-axsh/wakame}
 
 prepare
 
