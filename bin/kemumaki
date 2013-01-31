@@ -126,6 +126,103 @@ function run_report(){
   ${abs_dirname}/test.${name}/report ${test_status}
 }
 
+function vmapp(){
+  local dist_name=$1
+  local dest_dir=$2
+  [[ -n ${dist_name} ]] || dist_name=${vmapp_suite}
+  [[ -n ${dest_dir} ]] || dest_dir=${vmapp_deploy_dir} 
+  [[ -d ${vdc_dir} ]] || { echo "[ERROR] vdc_dir not found: ${vdc_dir}" >&2; return 1; }
+  # build start
+  [[ -d ${vdc_dir}/vmapp/${dist_name} ]] || { echo "[ERROR] not found suite, available values: \"$(find_suite)\"" >&2; return 1; }
+  cd ${vdc_dir}/vmapp
+  ${vdc_dir}/vmapp/build.sh ${dist_name}
+  # deploy start
+  deploy_vmdir ${dist_name} ${dest_dir}
+}
+
+function deploy_vmdir() {
+  local source_dir=${vdc_dir}/vmapp/$1
+  local deploy_base_dir=$2/vmapp/$1
+
+  [[ -d ${source_dir} ]] || { echo "[ERROR] not found suite, available values: \"$(find_suite)\"" >&2; return 1; }
+  [[ -d ${deploy_base_dir} ]] || mkdir -p ${deploy_base_dir}
+
+  # remove oldest files until get storage available space
+  while [ $(is_available_storage_space ${source_dir} ${deploy_base_dir}) = "false" ]; do
+    local oldest_dir=$(get_oldest_dir ${deploy_base_dir})
+    [[ -n ${oldest_dir} ]] || { echo "[ERROR] does not get available disk space: ${deploy_base_dir}" >&2; return 1; }
+    remove_file "${deploy_base_dir}/${oldest_dir}"
+  done
+
+  local deploy_dir="${deploy_base_dir}/$(get_numeric_name)"
+  [[ -d ${deploy_dir} ]] || mkdir -p ${deploy_dir}
+
+  local file_name
+  # move "*.gz", "*.raw" to deploy directory
+  for file_name in $(ls ${source_dir}/{*.gz,*.raw}); do
+    mv ${file_name} ${deploy_dir}
+  done
+  clean_dir ${deploy_base_dir}
+}
+
+function find_suite() {
+#  local current=$(cd $(dirname $0);pwd)
+  local current=${vdc_dir}/vmapp
+  local suite_name dir_name
+  # find image.ini below "vmapp" directory.(except for "test")
+  for suite_name in $(ls $current/*/image.ini); do
+    dir_name=$(dirname $suite_name)
+    echo -n "${dir_name##*/} "
+  done
+}
+
+function is_available_storage_space() {
+  local source_files=$1 # directory or files
+  local dest_path=$2
+  local file_name source_size
+
+  for file_name in ${source_files}; do
+    let source_size="${source_size} + $(du -ks ${file_name} | awk '{print $1}')"
+  done
+
+  # get available size exactly from df output (delete '\n')
+  local dest_available_size=$(df -k ${dest_path} | grep / | tr -d '\012' | awk '{print $4}')
+  if [[ ${dest_available_size} -gt ${source_size} ]]; then
+    echo "true"
+  else
+    echo "[WARN] does not have available disk space: ${dest_path}" >&2
+    echo "false"
+  fi
+}
+
+function get_oldest_dir() {
+  local dir_name=$1
+  [[ -d ${dir_name} ]] || { echo "[ERROR] not found directory: ${dir_name}" >&2; return 1; }
+  echo $(ls -1rt ${dir_name} | head -n 1)
+}
+
+function get_numeric_name() {
+  echo $(date '+%Y%m%d%H%M%S')
+}
+
+function remove_file() {
+  rm -rf $1
+  #echo "remove: $1"
+}
+
+function clean_dir() {
+  local dir_name=$1
+
+  [[ -d ${dir_name} ]] || { echo "[ERROR] not found directory: ${dir_name}" >&2; return 1; }
+  local file_name
+  for file_name in $(ls ${dir_name}); do
+    # "ls -a1" output only "./" "../", delete directory
+    if [[ $(ls -a1 ${dir_name}/${file_name} | wc -l) -le 2 ]]; then
+      remove_file ${dir_name}/${file_name}
+    fi
+  done
+}
+
 LANG=C
 LC_ALL=C
 
@@ -169,6 +266,9 @@ setup)
   ;;
 test)
   run_tests $*
+  ;;
+vmapp)
+  vmapp $*
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
