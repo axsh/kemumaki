@@ -49,6 +49,7 @@ function initialize(){
   vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
 
   # vmapp
+  vmbuilder_home=${VMBUILDER_HOME:-${vmbuilder_home:-${abs_dirname}/vmbuilder}}
   vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
   vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-centos6}}
 
