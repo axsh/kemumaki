@@ -36,7 +36,6 @@ function md_table(){
 
 function md_pre(){
   cat | sed "s/^/    /"
-EOS
 }
 
 function report(){
