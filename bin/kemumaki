@@ -182,6 +182,12 @@ test)
 vmapp)
   vmapp $*
   ;;
+<<<<<<< HEAD
+=======
+vmapp)
+  vmapp $*
+  ;;
+>>>>>>> 9a4ae99c56bbe3a08a58c1a7788a95a4ed5faa36
 *)
   echo "[ERROR] no such command: ${command}"
   exit 1
