@@ -52,7 +52,7 @@ function initialize(){
 
   # vmapp
   vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
-  vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-centos6}}
+  vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-all}}
 
   ssh_opts=${ssh_opts:-"-o StrictHostKeyChecking=no"}
 

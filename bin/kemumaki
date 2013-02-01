@@ -129,15 +129,36 @@ function run_report(){
 function vmapp(){
   local dist_name=$1
   local dest_dir=$2
+
   [[ -n ${dist_name} ]] || dist_name=${vmapp_suite}
   [[ -n ${dest_dir} ]] || dest_dir=${vmapp_deploy_dir} 
   [[ -d ${vdc_dir} ]] || { echo "[ERROR] vdc_dir not found: ${vdc_dir}" >&2; return 1; }
   # build start
-  [[ -d ${vdc_dir}/vmapp/${dist_name} ]] || { echo "[ERROR] not found suite, available values: \"$(find_suite)\"" >&2; return 1; }
+  local dist_names
+  local buildable="true"
+  if [[ ${dist_name} = "all" ]]; then
+    dist_names=$(find_suite)
+  elif [[ ${dist_name} = "none" ]]; then
+    dist_names=$(find_suite)
+    buildable="false" 
+  else
+    dist_names=${dist_name}
+  fi
+  # check distribution name directory existence under "vmapp"
+  local distribution
+  for distribution in ${dist_names}; do
+    [[ -d ${vdc_dir}/vmapp/${distribution} ]] || { echo "[ERROR] not found suite, available values: \"$(find_suite)\"" >&2; return 1; }
+  done
   cd ${vdc_dir}/vmapp
-  ${vdc_dir}/vmapp/build.sh ${dist_name}
-  # deploy start
-  deploy_vmdir ${dist_name} ${dest_dir}
+  for distribution in ${dist_names}; do
+    # build.sh take long time...
+    if [[ ${buildable} = "true" ]]; then
+      ${vdc_dir}/vmapp/build.sh ${distribution}
+    fi
+
+    # deploy start
+    deploy_vmdir ${distribution} ${dest_dir}
+  done
 }
 
 function deploy_vmdir() {
