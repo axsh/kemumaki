@@ -22,7 +22,7 @@ function initialize(){
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
   report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-/var/www/html/reports}}
   report_dir=${report_dir%/} # remove trailing slash
-  report_url_prefix=${KEMUMAKI_REPORT_URL_PREFIX:-${report_url_prefix:-reports}}=reports
+  report_url_prefix=${KEMUMAKI_REPORT_URL_PREFIX:-${report_url_prefix:-reports}}
   
   run_mode=${run_mode:-jenkins}
 
