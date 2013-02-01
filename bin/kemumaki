@@ -70,7 +70,7 @@ function rpmbuild(){
   cd ${lib_dir}
   ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh ${vdc_dir}
-  trap ERR
+  trap - ERR
   notify_rpmbuild done
   echo "rpmbuild: done"
 }
@@ -89,7 +89,7 @@ function run_tests(){
   echo "test: started"
   notify "test: started> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
   local state="done"
-  local result=
+  local summary=
   local t=
   for t in $*; do
     local s="success"
@@ -98,13 +98,13 @@ function run_tests(){
       s="failure"
       state="failed"
     }
-    result="${result}${t}: ${s}\n"
+    summary="${summary}${t}: ${s}\n"
     [[ -x "${abs_dirname}/test.${t}/report" ]] && {
       sleep 3
       run_report ${t} ${s}
     }
   done
-  echo -e ${result} > ${report_dir}/${vdc_release_id}/summary.md
+  echo -e ${summary} > ${report_dir}/${vdc_release_id}/summary.md
   local message="test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
   [[ ${run_mode} = jenkins ]] && [[ -n ${JENKINS_URL} ]] && { message="${message} report: ${JENKINS_URL}${report_url_prefix}/${vdc_release_id}/"; } || :
   notify "${message}"
@@ -112,10 +112,14 @@ function run_tests(){
 }
 
 function run_test(){
+  trap "echo piyo; return 1" ERR
   local name=${1}
   [[ -x "${abs_dirname}/test.${name}/test" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}/test" >&2; return 1; }
   echo "testing ${abs_dirname}/test.${name}/test"
-  ${abs_dirname}/test.${name}/test
+  local timeout_for_this_test=$(eval echo '$TEST_TIMEOUT_'$(uppercase ${name}))
+  timeout ${timeout_for_this_test:-${test_timeout}} ${abs_dirname}/test.${name}/test
+  trap - ERR
+  return 0
 }
 
 function run_report(){
@@ -227,6 +231,7 @@ LANG=C
 LC_ALL=C
 
 set -e
+set -o pipefail
 
 exec > >(tee kemumaki.log) 2>&1
 

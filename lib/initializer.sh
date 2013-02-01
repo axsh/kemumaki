@@ -56,6 +56,8 @@ function initialize(){
 
   ssh_opts=${ssh_opts:-"-o StrictHostKeyChecking=no"}
 
+  test_timeout=${TEST_TIMEOUT:-${test_timeout:-$((60 * 30))}}
+
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${report_dir}
