@@ -93,11 +93,13 @@ function run_tests(){
   local t=
   for t in $*; do
     local s="success"
+    set +e
     run_test ${t}
     [[ $? -eq 0 ]] || {
       s="failure"
       state="failed"
     }
+    set -e
     summary="${summary}${t}: ${s}\n"
     [[ -x "${abs_dirname}/test.${t}/report" ]] && {
       sleep 3
@@ -108,18 +110,16 @@ function run_tests(){
   local message="test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
   [[ ${run_mode} = jenkins ]] && [[ -n ${JENKINS_URL} ]] && { message="${message} report: ${JENKINS_URL}${report_url_prefix}/${vdc_release_id}/"; } || :
   notify "${message}"
-  echo "test: done"
+  echo "test: ${state}"
 }
 
 function run_test(){
-  trap "echo piyo; return 1" ERR
   local name=${1}
   [[ -x "${abs_dirname}/test.${name}/test" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}/test" >&2; return 1; }
   echo "testing ${abs_dirname}/test.${name}/test"
   local timeout_for_this_test=$(eval echo '$TEST_TIMEOUT_'$(uppercase ${name}))
   timeout ${timeout_for_this_test:-${test_timeout}} ${abs_dirname}/test.${name}/test
-  trap - ERR
-  return 0
+  return $?
 }
 
 function run_report(){
