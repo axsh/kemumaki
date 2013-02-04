@@ -126,16 +126,47 @@ function run_report(){
   ${abs_dirname}/test.${name}/report ${test_status}
 }
 
+function vmapp_main(){
+#  [[ $# -gt 0 ]] || { vmapp_usage; return 1; }
+  local buildable=true
+  local suite_name=all dest_dir=${vmapp_deploy_dir}
+  while getopts "b:d:hs:" option; do
+    case ${option} in
+    b) [[ ${OPTARG} = "true" ]] || [[ ${OPTARG} = "false" ]] || 
+      { echo "[ERROR] -b [true|false]: ${OPTARG}"; echo ""; vmapp_usage; return 1; }
+      buildable=${OPTARG};;
+    d) [[ -d ${OPTARG} ]] || 
+      { echo "[ERROR] Directory not found: ${OPTARG}"; echo ""; vmapp_usage; return 1; }
+      dest_dir=${OPTARG};;
+    h) vmapp_usage; return 1;;
+    s) suite_name=${OPTARG};;
+    *) vmapp_usage; return 1;;
+    esac
+  done
+  vmapp ${suite_name} ${dest_dir} ${buildable}
+}
+
+function vmapp_usage() {
+  cat << EOT
+usage: vmapp [-b true|false] [-h] [-s SUITE_NAME] [-d TO_DEPLOY_DIR]
+
+arguments are:
+-b: execute build vm 
+-d: The name of directory that move virtual machine modules to there.
+-h: this help.
+-s: suite name for [all|none|$(echo $(find_suite) | sed 's/ /\|/g')]
+EOT
+}
+
 function vmapp(){
   local dist_name=$1
   local dest_dir=$2
-
+  local buildable=$3
   [[ -n ${dist_name} ]] || dist_name=${vmapp_suite}
   [[ -n ${dest_dir} ]] || dest_dir=${vmapp_deploy_dir} 
   [[ -d ${vdc_dir} ]] || { echo "[ERROR] vdc_dir not found: ${vdc_dir}" >&2; return 1; }
   # build start
   local dist_names
-  local buildable="true"
   if [[ ${dist_name} = "all" ]]; then
     dist_names=$(find_suite)
   elif [[ ${dist_name} = "none" ]]; then
@@ -154,10 +185,12 @@ function vmapp(){
     # build.sh take long time...
     if [[ ${buildable} = "true" ]]; then
       ${vdc_dir}/vmapp/build.sh ${distribution}
+#      echo "${vdc_dir}/vmapp/build.sh ${distribution}"
     fi
 
     # deploy start
     deploy_vmdir ${distribution} ${dest_dir}
+#    echo "deploy_vmdir: ${distribution} ${dest_dir}"
   done
 }
 
@@ -289,7 +322,7 @@ test)
   run_tests $*
   ;;
 vmapp)
-  vmapp $*
+  vmapp_main $*
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
