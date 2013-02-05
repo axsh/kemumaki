@@ -126,36 +126,92 @@ function run_report(){
   ${abs_dirname}/test.${name}/report ${test_status}
 }
 
+function vmapp_getopts_adaptor(){
+  local arg1=$1 # suite name
+  local arg2=$2 # to deploy directory
+
+  # start with "-" pass through vmapp_main
+  if [[ -n $(echo ${arg1} | grep -e "^-.*") ]]; then
+    #echo "start pass through \"$*\""
+    vmapp_main $*
+  else
+    #echo "strict arguments order"
+    if [[ $# -eq 0 ]]; then
+      vmapp_main
+    elif [[ $# -eq 1 ]]; then
+      vmapp_main -s ${arg1}
+    elif [[ $# -eq 2 ]]; then
+      vmapp_main -s ${arg1} -d ${arg2}
+    else
+      echo "[ERROR] too much arguments." >&2
+      return 1
+    fi
+  fi
+}
+
 function vmapp_main(){
 #  [[ $# -gt 0 ]] || { vmapp_usage; return 1; }
   local buildable=true
   local suite_name=all dest_dir=${vmapp_deploy_dir}
-  while getopts "b:d:hs:" option; do
+  local loop_num=128
+  while getopts "b:d:hl:s:" option; do
     case ${option} in
     b) [[ ${OPTARG} = "true" ]] || [[ ${OPTARG} = "false" ]] || 
-      { echo "[ERROR] -b [true|false]: ${OPTARG}"; echo ""; vmapp_usage; return 1; }
+      { echo "[ERROR] -b [true|false]: ${OPTARG}" >&2; echo ""; vmapp_usage; return 1; }
       buildable=${OPTARG};;
     d) [[ -d ${OPTARG} ]] || 
-      { echo "[ERROR] Directory not found: ${OPTARG}"; echo ""; vmapp_usage; return 1; }
+      { echo "[ERROR] Directory not found: ${OPTARG}" >&2; echo ""; vmapp_usage; return 1; }
       dest_dir=${OPTARG};;
     h) vmapp_usage; return 1;;
+    l) [[ -z $(echo ${OPTARG} | sed 's/[0-9]//g') ]] || 
+      { 
+        echo "[ERROR] loop back device size must be numeric: ${OPTARG}" >&2 
+        echo ""; vmapp_usage; return 1;
+      }
+       loop_num=${OPTARG};;
     s) suite_name=${OPTARG};;
     *) vmapp_usage; return 1;;
     esac
   done
+  mknod_loop ${loop_num}
   vmapp ${suite_name} ${dest_dir} ${buildable}
 }
 
 function vmapp_usage() {
   cat << EOT
-usage: vmapp [-b true|false] [-h] [-s SUITE_NAME] [-d TO_DEPLOY_DIR]
+usage: vmapp [-b true|false] [-d TO_DEPLOY_DIR] [-h]
+             [-l LOOP_BACK_DEVICE_COUNT] [-s SUITE_NAME] 
 
 arguments are:
 -b: execute build vm 
 -d: The name of directory that move virtual machine modules to there.
 -h: this help.
+-l: loop device size count.
 -s: suite name for [all|none|$(echo $(find_suite) | sed 's/ /\|/g')]
 EOT
+}
+
+function mknod_loop(){
+  local arg_num=$1
+  [[ -z $(echo ${arg_num} | sed 's/[0-9]//g') ]] ||
+  {
+    echo "[ERROR] loop back device size must be numeric: ${arg_num}" >&2
+    return 1
+  }
+  if [[ $(ls -1 /dev/loop* | wc -l) -ge ${arg_num} ]]; then
+    return 0
+  fi 	
+  local loop_num=`expr ${arg_num} - 1`
+  local min=$(ls -1 /dev/loop* | wc -l)
+  local num device_name
+  for num in $(seq ${min} ${loop_num}); do
+    device_name="/dev/loop${num}" 
+    mknod -m 660 ${device_name} b 7 ${num}
+     # change owner same as '/dev/loop0'
+    chown $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_name}
+#    echo "mknod: -m 660 ${device_name} b 7 ${num}"
+#    echo "chown: $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_name}"
+  done
 }
 
 function vmapp(){
@@ -322,7 +378,7 @@ test)
   run_tests $*
   ;;
 vmapp)
-  vmapp_main $*
+  vmapp_getopts_adaptor $*
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
