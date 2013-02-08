@@ -130,18 +130,139 @@ function run_report(){
   ${abs_dirname}/test.${name}/report ${test_status}
 }
 
+function vmapp_getopts_adaptor(){
+  local arg1=$1 # suite name
+  local arg2=$2 # to deploy directory
+
+  # start with "-" pass through vmapp_main
+  if [[ -n $(echo ${arg1} | grep -e "^-.*") ]]; then
+    #echo "start pass through \"$*\""
+    vmapp_main $*
+  else
+    #echo "strict arguments order"
+    if [[ $# -eq 0 ]]; then
+      vmapp_main
+    elif [[ $# -eq 1 ]]; then
+      vmapp_main -s ${arg1}
+    elif [[ $# -eq 2 ]]; then
+      vmapp_main -s ${arg1} -d ${arg2}
+    else
+      echo "[ERROR] too much arguments." >&2
+      return 1
+    fi
+  fi
+}
+
+function vmapp_main(){
+#  [[ $# -gt 0 ]] || { vmapp_usage; return 1; }
+  local buildable=true
+  local suite_name=all dest_dir=${vmapp_deploy_dir}
+  local loop_num=128
+  while getopts "b:d:hl:s:" option; do
+    case ${option} in
+    b) [[ ${OPTARG} = "true" ]] || [[ ${OPTARG} = "false" ]] || 
+      { echo "[ERROR] -b [true|false]: ${OPTARG}" >&2; echo ""; vmapp_usage; return 1; }
+      buildable=${OPTARG};;
+    d) [[ -d ${OPTARG} ]] || 
+      { echo "[ERROR] Directory not found: ${OPTARG}" >&2; echo ""; vmapp_usage; return 1; }
+      dest_dir=${OPTARG};;
+    h) vmapp_usage; return 1;;
+    l) [[ -z $(echo ${OPTARG} | sed 's/[0-9]//g') ]] || 
+      { 
+        echo "[ERROR] loop back device size must be numeric: ${OPTARG}" >&2 
+        echo ""; vmapp_usage; return 1;
+      }
+       loop_num=${OPTARG};;
+    s) suite_name=${OPTARG};;
+    *) vmapp_usage; return 1;;
+    esac
+  done
+  prepare_loop_back ${loop_num}
+  vmapp ${suite_name} ${dest_dir} ${buildable}
+}
+
+function vmapp_usage() {
+  cat << EOT
+usage: vmapp [-b true|false] [-d TO_DEPLOY_DIR] [-h]
+             [-l LOOP_BACK_DEVICE_COUNT] [-s SUITE_NAME] 
+
+arguments are:
+-b: execute build vm 
+-d: The name of directory that move virtual machine modules to there.
+-h: this help.
+-l: loop device size count.
+-s: suite name for [all|none|$(echo $(find_suite) | sed 's/ /\|/g')]
+EOT
+}
+
+function prepare_loop_back(){
+  local size=$1
+  # find device configuration 
+  if [[ ! -f /etc/udev/makedev.d/50-udev.nodes ]]; then
+    # must be rebooted to take effect.
+    ${vdc_dir}/rpmbuild/helpers/add-loopdev.sh
+  fi
+  # make loopback device explicityly.
+  mknod_loop ${size}
+}
+
+function mknod_loop(){
+  local arg_num=$1
+  [[ -z $(echo ${arg_num} | sed 's/[0-9]//g') ]] ||
+  {
+    echo "[ERROR] loop back device size must be numeric: ${arg_num}" >&2
+    return 1
+  }
+  if [[ $(ls -1 /dev/loop* | wc -l) -ge ${arg_num} ]]; then
+    return 0
+  fi 	
+  local loop_num=`expr ${arg_num} - 1`
+  local min=$(ls -1 /dev/loop* | wc -l)
+  local num device_name
+  for num in $(seq ${min} ${loop_num}); do
+    device_name="/dev/loop${num}" 
+    mknod -m 660 ${device_name} b 7 ${num}
+     # change owner same as '/dev/loop0'
+    chown $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_name}
+#    echo "mknod: -m 660 ${device_name} b 7 ${num}"
+#    echo "chown: $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_name}"
+  done
+}
+
 function vmapp(){
   local dist_name=$1
   local dest_dir=$2
+  local buildable=$3
   [[ -n ${dist_name} ]] || dist_name=${vmapp_suite}
   [[ -n ${dest_dir} ]] || dest_dir=${vmapp_deploy_dir} 
   [[ -d ${vdc_dir} ]] || { echo "[ERROR] vdc_dir not found: ${vdc_dir}" >&2; return 1; }
   # build start
-  [[ -d ${vdc_dir}/vmapp/${dist_name} ]] || { echo "[ERROR] not found suite, available values: \"$(find_suite)\"" >&2; return 1; }
+  local dist_names
+  if [[ ${dist_name} = "all" ]]; then
+    dist_names=$(find_suite)
+  elif [[ ${dist_name} = "none" ]]; then
+    dist_names=$(find_suite)
+    buildable="false" 
+  else
+    dist_names=${dist_name}
+  fi
+  # check distribution name directory existence under "vmapp"
+  local distribution
+  for distribution in ${dist_names}; do
+    [[ -d ${vdc_dir}/vmapp/${distribution} ]] || { echo "[ERROR] not found suite, available values: \"$(find_suite)\"" >&2; return 1; }
+  done
   cd ${vdc_dir}/vmapp
-  ${vdc_dir}/vmapp/build.sh ${dist_name}
-  # deploy start
-  deploy_vmdir ${dist_name} ${dest_dir}
+  for distribution in ${dist_names}; do
+    # build.sh take long time...
+    if [[ ${buildable} = "true" ]]; then
+      ${vdc_dir}/vmapp/build.sh ${distribution}
+#      echo "${vdc_dir}/vmapp/build.sh ${distribution}"
+    fi
+
+    # deploy start
+    deploy_vmdir ${distribution} ${dest_dir}
+#    echo "deploy_vmdir: ${distribution} ${dest_dir}"
+  done
 }
 
 function deploy_vmdir() {
@@ -273,7 +394,7 @@ test)
   run_tests $*
   ;;
 vmapp)
-  vmapp $*
+  vmapp_getopts_adaptor $*
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
