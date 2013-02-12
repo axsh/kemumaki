@@ -201,9 +201,17 @@ function prepare_loop_back(){
   if [[ ! -f /etc/udev/makedev.d/50-udev.nodes ]]; then
     # must be rebooted to take effect.
     ${vdc_dir}/rpmbuild/helpers/add-loopdev.sh
+    # create device manually.
+    local device_name
+    for device_name in $(egrep "loop[0-9]{1,}" /etc/udev/makedev.d/50-udev.nodes); do
+      create_loopback_device "/dev/${device_name}"
+    done
   fi
-  # make loopback device explicityly.
-  mknod_loop ${size}
+  
+  # if loopback device count is default size(8), create it manually.
+  if [[ $(ls -1 /dev/loop[0-9]* | wc -l) -le 8 ]]; then
+    mknod_loop ${size}
+  fi
 }
 
 function mknod_loop(){
@@ -213,20 +221,32 @@ function mknod_loop(){
     echo "[ERROR] loop back device size must be numeric: ${arg_num}" >&2
     return 1
   }
-  if [[ $(ls -1 /dev/loop* | wc -l) -ge ${arg_num} ]]; then
+  if [[ $(ls -1 /dev/loop[0-9]* | wc -l) -ge ${arg_num} ]]; then
     return 0
   fi 	
   local loop_num=`expr ${arg_num} - 1`
   local min=$(ls -1 /dev/loop* | wc -l)
-  local num device_name
+  local num device_path
   for num in $(seq ${min} ${loop_num}); do
-    device_name="/dev/loop${num}" 
-    mknod -m 660 ${device_name} b 7 ${num}
-     # change owner same as '/dev/loop0'
-    chown $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_name}
-#    echo "mknod: -m 660 ${device_name} b 7 ${num}"
-#    echo "chown: $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_name}"
+    device_path="/dev/loop${num}" 
+    create_loopback_device ${device_path}
   done
+}
+
+function create_loopback_device() {
+  local device_path=$1
+  [[ "${device_path}" =~ /dev/loop[0-9]{1,} ]] ||
+    { echo "[ERROR] not found loopback device name: loop[0-9]{1,}" >&2; return 1;}
+  # exists already, return 0
+  if [[ -e "${device_path}" ]]; then
+    return 0
+  fi
+     
+#  echo "mknod: -m 660 ${device_path} b 7 $(echo ${device_path} | sed 's/\/dev\/loop//')"
+#  echo "chown: $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_path}"
+  mknod -m 660 ${device_path} b 7 $(echo ${device_path} | sed 's/\/dev\/loop//')
+  # change owner same as '/dev/loop0'
+  chown $(ls -l /dev/loop0 | awk '{print $3"."$4}') ${device_path}
 }
 
 function vmapp(){
@@ -256,12 +276,12 @@ function vmapp(){
     # build.sh take long time...
     if [[ ${buildable} = "true" ]]; then
       ${vdc_dir}/vmapp/build.sh ${distribution}
-#      echo "${vdc_dir}/vmapp/build.sh ${distribution}"
+##      echo "${vdc_dir}/vmapp/build.sh ${distribution}"
     fi
 
     # deploy start
     deploy_vmdir ${distribution} ${dest_dir}
-#    echo "deploy_vmdir: ${distribution} ${dest_dir}"
+##    echo "deploy_vmdir: ${distribution} ${dest_dir}"
   done
 }
 
