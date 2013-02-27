@@ -66,7 +66,7 @@ function rpmbuild(){
   echo "rpmbuild: started"
   [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   notify_rpmbuild started
-  trap "notify_rpmbuild failed && return 1" ERR
+  trap "notify_rpmbuild failed && exit 1" ERR
   cd ${lib_dir}
   ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh ${vdc_dir}
