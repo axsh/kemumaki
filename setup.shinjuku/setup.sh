@@ -75,7 +75,7 @@ EOS
 
 function update_repo_file(){
   local dest=${1:-${tmp_dir}/guestroot/etc/yum.repos.d/wakame-vdc.repo}
-  sed -i "s,^baseurl=.*$,baseurl=http://vdc-yum-repo-server/${vdc_yum_repo_url_path_prefix}/current," ${dest}
+  sed -i "s,^baseurl=.*$,baseurl=http://vdc-yum-repo-server/${vdc_yum_repo_url_path_prefix}/${vdc_yum_repo_branch}/current," ${dest}
   cat ${dest}
 }
 
@@ -253,6 +253,7 @@ dns=${dns:-8.8.8.8}
 vm_names=(dcmgr hva)
 keep_releases=${keep_releases:-5}
 vdc_yum_repo_url_path_prefix=${vdc_yum_repo_url_path_prefix:-axsh/wakame}
+vdc_yum_repo_branch=${vdc_yum_repo_branch:-master}
 
 prepare
 
