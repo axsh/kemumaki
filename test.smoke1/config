@@ -6,3 +6,4 @@ ssh_key_id=ssh-demo
 hypervisor=openvz
 cpu_cores=1
 memory_size=1024
+account_id=a-shpoolxx
