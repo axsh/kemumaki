@@ -50,7 +50,6 @@ dest_chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_num
   mkdir -p ${dest_chroot_dir}
 }
 rsync -ax --delete ${base_chroot_dir}/ ${dest_chroot_dir}/
-sync
 
 # for local repository
 case ${repo_uri} in
@@ -82,10 +81,8 @@ cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   cd wakame-vdc
 
   yum-builddep -y rpmbuild/SPECS/*.spec
-  sync
 
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
-  sync
 EOS
 
 for mount_target in proc dev; do
