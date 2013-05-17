@@ -74,9 +74,7 @@ setarch ${arch} chroot ${chroot_dir} $SHELL -ex <<EOS
 EOS
 
 for mount_target in proc dev; do
-  mount | grep ${chroot_dir}/${mount_target} && {
-    umount -l ${chroot_dir}/${mount_target}
-  }
+  mount | grep ${chroot_dir}/${mount_target} && umount -l ${chroot_dir}/${mount_target}
 done
 
 echo "Complete!!"
