@@ -74,14 +74,13 @@ yum_opts="--disablerepo='*' --enablerepo=base"
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   uname -m
 
-  yum ${yum_opts} install -y git make sudo
+  rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
+  yum ${yum_opts} install -y git make sudo rpm-build rpmdevtools yum-utils
 
   cd /tmp
   [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
   cd wakame-vdc
 
-  rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
-  yum ${yum_opts} install -y rpm-build rpmdevtools yum-utils
   yum-builddep -y rpmbuild/SPECS/*.spec
   sync
 
