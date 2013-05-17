@@ -21,18 +21,10 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-base_distro=${base_distro:-centos}
-base_distro_number=${base_distro_number:-6}
-base_distro_arch=${base_distro_arch:-$(arch)}
+distro_name=centos
+distro_ver=6
+distro_arch=$(arch)
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
-
-execscript=${execscript:-}
-
-arch=${base_distro_arch}
-case "${arch}" in
-  i*86) basearch=i386 arch=i686 ;;
-x86_64) basearch=${arch} ;;
-esac
 
 [[ $UID -ne 0 ]] && {
   echo "ERROR: Run as root" >/dev/stderr
@@ -41,86 +33,43 @@ esac
 
 [[ -d "$rpmbuild_tmp_dir" ]] || mkdir -p "$rpmbuild_tmp_dir"
 
-base_chroot_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
-dest_chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
+distro_dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${distro_arch}
+chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${distro_arch}
 
-[ -d ${base_chroot_dir} ] || {
-  ${vmbuilder_dir}/kvm/rhel/6/cebootstrap.sh \
-   --distro_name=${base_distro} \
-   --distro_ver=${base_distro_number} \
-   --distro_arch=${base_distro_arch} \
-   --chroot_dir=${base_chroot_dir} \
-   --batch=1 \
-   --debug=1
-  sync
-}
-
-[ -d ${dest_chroot_dir} ] && {
-  echo already exists: ${dest_chroot_dir} >&2
-} || {
-  mkdir -p ${dest_chroot_dir}
-}
-rsync -ax --delete ${base_chroot_dir}/ ${dest_chroot_dir}/
-sync
+# setup-ci-env.sh setup "distro_dir" in "bin/kemumaki rpmbuild"
+[[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
+rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
 
 # for local repository
 case ${repo_uri} in
 file:///*|/*)
   local_path=${repo_uri##file://}
   [ -d ${local_path} ] && {
-    [ -d ${dest_chroot_dir}/${local_path} ] || mkdir -p ${dest_chroot_dir}/${local_path}
-    rsync -avx ${local_path}/ ${dest_chroot_dir}/${local_path}
+    [ -d ${chroot_dir}/${local_path} ] || mkdir -p ${chroot_dir}/${local_path}
+    rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
   }
-  ;;
-*)
   ;;
 esac
 
 for mount_target in proc dev; do
-  mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
+  mount | grep ${chroot_dir}/${mount_target} || mount --bind /${mount_target} ${chroot_dir}/${mount_target}
 done
 
-yum_opts="--disablerepo='*'"
-case ${base_distro} in
-centos)
-  yum_opts="${yum_opts} --enablerepo=base"
-  ;;
-sl|scientific)
-  yum_opts="${yum_opts} --enablerepo=sl"
-  ;;
-esac
-
-cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
-  uname -m
-
-  yum ${yum_opts} install -y git make sudo
+chroot ${chroot_dir} $SHELL -ex <<EOS
+  rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
+  yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils
 
   cd /tmp
   [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
   cd wakame-vdc
 
-  ### *TODO*
-  ### remove "./tests/vdc.sh install::rhel" dependency
-  ### 1. avoid unnecessary building ruby-binary
-  rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
-  yum ${yum_opts} install -y rpm-build rpmdevtools yum-utils
   yum-builddep -y rpmbuild/SPECS/*.spec
-  sync
 
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
-  sync
 EOS
 
-[ -z "${execscript}" ] || {
-  [ -x "${execscript}" ] && {
-    setarch ${arch} ${execscript} ${dest_chroot_dir}
-  } || :
-}
-
 for mount_target in proc dev; do
-  mount | grep ${dest_chroot_dir}/${mount_target} && {
-    umount -l ${dest_chroot_dir}/${mount_target}
-  }
+  mount | grep ${chroot_dir}/${mount_target} && umount -l ${chroot_dir}/${mount_target}
 done
 
 echo "Complete!!"

@@ -5,10 +5,6 @@ set -e
 
 . ./../config/rpmbuild.conf
 
-function update_repo() {
-  git pull
-}
-
 function setup_chroot_dir() {
   [ -d ${rpmbuild_tmp_dir}/chroot/base ] || mkdir -p ${rpmbuild_tmp_dir}/chroot/base/
   cd ${rpmbuild_tmp_dir}/chroot/base
@@ -21,22 +17,16 @@ function setup_chroot_dir() {
   distro="${distro_name}-${distro_ver}"
   distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
-  for arch in ${archs}; do
-    [ -f ${distro_detail}_${arch}.tar.gz ] || curl -R -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_detail}_${arch}.tar.gz
-    [ -d ${distro_detail}_${arch}        ] || tar zxpf ${distro_detail}_${arch}.tar.gz
-    [ -d ${distro}_${arch}               ] || mv ${distro_detail}_${arch} ${distro}_${arch}
+  for distro_arch in ${archs}; do
+    [ -f ${distro_detail}_${distro_arch}.tar.gz ] || curl -R -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_detail}_${distro_arch}.tar.gz
+    [ -d ${distro_detail}_${distro_arch}        ] || tar zxpf ${distro_detail}_${distro_arch}.tar.gz
+    [ -d ${distro}_${distro_arch}               ] || mv ${distro_detail}_${distro_arch} ${distro}_${distro_arch}
   done
 }
 
 case $1 in
-update_repo)
-  $1
-  ;;
 setup_chroot_dir)
+  (cd .. &&  git submodule update --init)
   $1
-  ;;
-*)
-  update_repo
-  setup_chroot_dir
   ;;
 esac
