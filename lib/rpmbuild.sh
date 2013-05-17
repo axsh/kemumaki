@@ -99,7 +99,6 @@ cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
   cd wakame-vdc
 
-  sleep 3
   ### *TODO*
   ### remove "./tests/vdc.sh install::rhel" dependency
   ### 1. avoid unnecessary building ruby-binary
@@ -108,7 +107,6 @@ cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   yum-builddep -y rpmbuild/SPECS/*.spec
   sync
 
-  sleep 3
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
   sync
 EOS
