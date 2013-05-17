@@ -26,6 +26,7 @@ function setup_chroot_dir() {
 
 case $1 in
 setup_chroot_dir)
+  (cd .. &&  git submodule update --init)
   $1
   ;;
 esac
