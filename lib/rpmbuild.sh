@@ -69,8 +69,7 @@ for mount_target in proc dev; do
   mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
 done
 
-yum_opts="--disablerepo='*'"
-yum_opts="${yum_opts} --enablerepo=base"
+yum_opts="--disablerepo='*' --enablerepo=base"
 
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   uname -m
