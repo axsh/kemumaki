@@ -23,7 +23,7 @@ done
 
 base_distro=centos
 base_distro_number=6
-base_distro_arch=${base_distro_arch:-$(arch)}
+base_distro_arch=$(arch)
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
 [[ $UID -ne 0 ]] && {
@@ -55,12 +55,7 @@ for mount_target in proc dev; do
   mount | grep ${chroot_dir}/${mount_target} || mount --bind /${mount_target} ${chroot_dir}/${mount_target}
 done
 
-arch=${base_distro_arch}
-case "${arch}" in
-i*86) basearch=i386 arch=i686 ;;
-esac
-
-setarch ${arch} chroot ${chroot_dir} $SHELL -ex <<EOS
+chroot ${chroot_dir} $SHELL -ex <<EOS
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils
 
