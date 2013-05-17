@@ -34,25 +34,25 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 [[ -d "$rpmbuild_tmp_dir" ]] || mkdir -p "$rpmbuild_tmp_dir"
 
 base_chroot_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
-dest_chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
+chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
 # setup-ci-env.sh setup "base_chroot_dir" in "bin/kemumaki rpmbuild"
-[[ -d "${dest_chroot_dir}" ]] || mkdir -p ${dest_chroot_dir}
-rsync -ax --delete ${base_chroot_dir}/ ${dest_chroot_dir}/
+[[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
+rsync -ax --delete ${base_chroot_dir}/ ${chroot_dir}/
 
 # for local repository
 case ${repo_uri} in
 file:///*|/*)
   local_path=${repo_uri##file://}
   [ -d ${local_path} ] && {
-    [ -d ${dest_chroot_dir}/${local_path} ] || mkdir -p ${dest_chroot_dir}/${local_path}
-    rsync -avx ${local_path}/ ${dest_chroot_dir}/${local_path}
+    [ -d ${chroot_dir}/${local_path} ] || mkdir -p ${chroot_dir}/${local_path}
+    rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
   }
   ;;
 esac
 
 for mount_target in proc dev; do
-  mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
+  mount | grep ${chroot_dir}/${mount_target} || mount --bind /${mount_target} ${chroot_dir}/${mount_target}
 done
 
 arch=${base_distro_arch}
@@ -60,7 +60,7 @@ case "${arch}" in
 i*86) basearch=i386 arch=i686 ;;
 esac
 
-setarch ${arch} chroot ${dest_chroot_dir} $SHELL -ex <<EOS
+setarch ${arch} chroot ${chroot_dir} $SHELL -ex <<EOS
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils
 
@@ -74,8 +74,8 @@ setarch ${arch} chroot ${dest_chroot_dir} $SHELL -ex <<EOS
 EOS
 
 for mount_target in proc dev; do
-  mount | grep ${dest_chroot_dir}/${mount_target} && {
-    umount -l ${dest_chroot_dir}/${mount_target}
+  mount | grep ${chroot_dir}/${mount_target} && {
+    umount -l ${chroot_dir}/${mount_target}
   }
 done
 
