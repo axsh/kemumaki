@@ -68,7 +68,7 @@ for mount_target in proc dev; do
   mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
 done
 
-cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
+setarch ${arch} chroot ${dest_chroot_dir} $SHELL -ex <<EOS
   uname -m
 
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
