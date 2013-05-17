@@ -26,8 +26,6 @@ base_distro_number=${base_distro_number:-6}
 base_distro_arch=${base_distro_arch:-$(arch)}
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
-execscript=${execscript:-}
-
 arch=${base_distro_arch}
 case "${arch}" in
   i*86) basearch=i386 arch=i686 ;;
@@ -101,12 +99,6 @@ cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
   sync
 EOS
-
-[ -z "${execscript}" ] || {
-  [ -x "${execscript}" ] && {
-    setarch ${arch} ${execscript} ${dest_chroot_dir}
-  } || :
-}
 
 for mount_target in proc dev; do
   mount | grep ${dest_chroot_dir}/${mount_target} && {
