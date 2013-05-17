@@ -5,10 +5,6 @@ set -e
 
 . ./../config/rpmbuild.conf
 
-function update_repo() {
-  git pull
-}
-
 function setup_chroot_dir() {
   [ -d ${rpmbuild_tmp_dir}/chroot/base ] || mkdir -p ${rpmbuild_tmp_dir}/chroot/base/
   cd ${rpmbuild_tmp_dir}/chroot/base
@@ -29,14 +25,7 @@ function setup_chroot_dir() {
 }
 
 case $1 in
-update_repo)
-  $1
-  ;;
 setup_chroot_dir)
   $1
-  ;;
-*)
-  update_repo
-  setup_chroot_dir
   ;;
 esac
