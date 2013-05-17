@@ -80,9 +80,6 @@ cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
   cd wakame-vdc
 
-  ### *TODO*
-  ### remove "./tests/vdc.sh install::rhel" dependency
-  ### 1. avoid unnecessary building ruby-binary
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
   yum ${yum_opts} install -y rpm-build rpmdevtools yum-utils
   yum-builddep -y rpmbuild/SPECS/*.spec
