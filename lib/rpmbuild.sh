@@ -21,8 +21,8 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-base_distro=centos
-base_distro_number=6
+distro_name=centos
+distro_ver=6
 arch=$(arch)
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
@@ -33,8 +33,8 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
 [[ -d "$rpmbuild_tmp_dir" ]] || mkdir -p "$rpmbuild_tmp_dir"
 
-distro_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${arch}
-chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${arch}
+distro_dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${arch}
+chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${arch}
 
 # setup-ci-env.sh setup "distro_dir" in "bin/kemumaki rpmbuild"
 [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
