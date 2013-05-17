@@ -60,8 +60,6 @@ file:///*|/*)
     rsync -avx ${local_path}/ ${dest_chroot_dir}/${local_path}
   }
   ;;
-*)
-  ;;
 esac
 
 for mount_target in proc dev; do
