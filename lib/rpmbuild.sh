@@ -29,9 +29,9 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 execscript=${execscript:-}
 
 arch=${base_distro_arch}
-case ${arch} in
-i*86)   basearch=i386; arch=i686;;
-x86_64) basearch=${arch};;
+case "${arch}" in
+  i*86) basearch=i386 arch=i686 ;;
+x86_64) basearch=${arch} ;;
 esac
 
 [[ $UID -ne 0 ]] && {
@@ -94,8 +94,6 @@ esac
 # run in chrooted env.
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   uname -m
-
-  [[ -f /etc/yum.conf ]] && sed -i "s,^keepcache=.*,keepcache=1," /etc/yum.conf
 
   yum ${yum_opts} update -y
   yum ${yum_opts} install -y git make sudo
