@@ -93,7 +93,6 @@ esac
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   uname -m
 
-  yum ${yum_opts} update -y
   yum ${yum_opts} install -y git make sudo
 
   cd /tmp
