@@ -26,11 +26,6 @@ base_distro_number=6
 base_distro_arch=${base_distro_arch:-$(arch)}
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
-arch=${base_distro_arch}
-case "${arch}" in
-i*86) basearch=i386 arch=i686 ;;
-esac
-
 [[ $UID -ne 0 ]] && {
   echo "ERROR: Run as root" >/dev/stderr
   exit 1
@@ -59,6 +54,11 @@ esac
 for mount_target in proc dev; do
   mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
 done
+
+arch=${base_distro_arch}
+case "${arch}" in
+i*86) basearch=i386 arch=i686 ;;
+esac
 
 setarch ${arch} chroot ${dest_chroot_dir} $SHELL -ex <<EOS
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
