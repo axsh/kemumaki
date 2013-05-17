@@ -69,8 +69,6 @@ for mount_target in proc dev; do
 done
 
 setarch ${arch} chroot ${dest_chroot_dir} $SHELL -ex <<EOS
-  uname -m
-
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils
 
