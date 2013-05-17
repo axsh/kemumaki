@@ -81,7 +81,6 @@ for mount_target in proc dev; do
 done
 
 yum_opts="--disablerepo='*'"
-# --enablerepo=wakame-vdc --enablerepo=openvz-kernel-rhel6 --enablerepo=openvz-utils"
 case ${base_distro} in
 centos)
   yum_opts="${yum_opts} --enablerepo=base"
@@ -91,7 +90,6 @@ sl|scientific)
   ;;
 esac
 
-# run in chrooted env.
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   uname -m
 
