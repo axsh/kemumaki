@@ -40,11 +40,11 @@ rpm-clean:
 
 rpm-32: rpm-32-stamp
 rpm-32-stamp:
-	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_32) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI)
+	setarch $(ARCH_32) $(RPMBUILD_SH) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI)
 	touch $@
 rpm-64: rpm-64-stamp
 rpm-64-stamp:
-	$(RPMBUILD_SH) --base-distro-arch=$(ARCH_64) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI)
+	setarch $(ARCH_64) $(RPMBUILD_SH) --build-id=$(VDC_BUILD_ID) --repo-uri=$(REPO_URI)
 	touch $@
 
 
