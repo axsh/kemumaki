@@ -2,7 +2,6 @@
 # rpm build script
 
 set -e
-#set -x
 
 . ./../config/rpmbuild.conf
 
@@ -28,13 +27,11 @@ base_distro_arch=${base_distro_arch:-$(arch)}
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
 execscript=${execscript:-}
-cacheback=${cacheback:-1}
 
-#arch=${arch:-$(arch)}
 arch=${base_distro_arch}
-case ${arch} in
-i*86)   basearch=i386; arch=i686;;
-x86_64) basearch=${arch};;
+case "${arch}" in
+  i*86) basearch=i386 arch=i686 ;;
+x86_64) basearch=${arch} ;;
 esac
 
 [[ $UID -ne 0 ]] && {
@@ -79,30 +76,11 @@ file:///*|/*)
   ;;
 esac
 
-### after-deploy
-case "${after_deploy}" in
-use-s3snap)
-  # skip deploying openvz.repo at "3rd-party.sh download"
-  cd ${dest_chroot_dir}/tmp
-
-  curl -O -R http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/snap/rhel/6/current/wakame-vdc-snap.repo
-  rsync -a ./wakame-vdc-snap.repo ${dest_chroot_dir}/etc/yum.repos.d/openvz.repo
-
-  [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
-  [ -d wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch} ] || mkdir -p wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}
-  rsync -a ./wakame-vdc-snap.repo wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}/openvz.repo
-  ;;
-*)
-  ;;
-esac
-### after-deploy
-
 for mount_target in proc dev; do
   mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
 done
 
 yum_opts="--disablerepo='*'"
-# --enablerepo=wakame-vdc --enablerepo=openvz-kernel-rhel6 --enablerepo=openvz-utils"
 case ${base_distro} in
 centos)
   yum_opts="${yum_opts} --enablerepo=base"
@@ -112,26 +90,25 @@ sl|scientific)
   ;;
 esac
 
-# run in chrooted env.
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
-uname -m
+  uname -m
 
-[[ -f /etc/yum.conf ]] && sed -i "s,^keepcache=.*,keepcache=1," /etc/yum.conf
+  yum ${yum_opts} install -y git make sudo
 
-yum ${yum_opts} update -y
-yum ${yum_opts} install -y git make sudo
+  cd /tmp
+  [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
+  cd wakame-vdc
 
-cd /tmp
-[ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
-cd wakame-vdc
+  ### *TODO*
+  ### remove "./tests/vdc.sh install::rhel" dependency
+  ### 1. avoid unnecessary building ruby-binary
+  rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
+  yum ${yum_opts} install -y rpm-build rpmdevtools yum-utils
+  yum-builddep -y rpmbuild/SPECS/*.spec
+  sync
 
-sleep 3
-./tests/vdc.sh install::rhel
-sync
-
-sleep 3
-VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
-sync
+  VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
+  sync
 EOS
 
 [ -z "${execscript}" ] || {
@@ -145,9 +122,5 @@ for mount_target in proc dev; do
     umount -l ${dest_chroot_dir}/${mount_target}
   }
 done
-
-[[ -z "${cacheback}" ]] || {
-  rsync -ax ${dest_chroot_dir}/var/cache/yum/ ${base_chroot_dir}/var/cache/yum/
-}
 
 echo "Complete!!"
