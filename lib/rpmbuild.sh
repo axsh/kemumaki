@@ -93,24 +93,24 @@ esac
 
 # run in chrooted env.
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
-uname -m
+  uname -m
 
-[[ -f /etc/yum.conf ]] && sed -i "s,^keepcache=.*,keepcache=1," /etc/yum.conf
+  [[ -f /etc/yum.conf ]] && sed -i "s,^keepcache=.*,keepcache=1," /etc/yum.conf
 
-yum ${yum_opts} update -y
-yum ${yum_opts} install -y git make sudo
+  yum ${yum_opts} update -y
+  yum ${yum_opts} install -y git make sudo
 
-cd /tmp
-[ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
-cd wakame-vdc
+  cd /tmp
+  [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
+  cd wakame-vdc
 
-sleep 3
-./tests/vdc.sh install::rhel
-sync
+  sleep 3
+  ./tests/vdc.sh install::rhel
+  sync
 
-sleep 3
-VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
-sync
+  sleep 3
+  VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
+  sync
 EOS
 
 [ -z "${execscript}" ] || {
