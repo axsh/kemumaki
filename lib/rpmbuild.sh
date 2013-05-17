@@ -42,12 +42,7 @@ base_chroot_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_num
 dest_chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
 # setup-ci-env.sh setup "base_chroot_dir" in "bin/kemumaki rpmbuild"
-
-[ -d ${dest_chroot_dir} ] && {
-  echo already exists: ${dest_chroot_dir} >&2
-} || {
-  mkdir -p ${dest_chroot_dir}
-}
+[[ -d "${dest_chroot_dir}" ]] || mkdir -p ${dest_chroot_dir}
 rsync -ax --delete ${base_chroot_dir}/ ${dest_chroot_dir}/
 
 # for local repository
