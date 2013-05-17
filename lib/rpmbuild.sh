@@ -33,12 +33,12 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
 [[ -d "$rpmbuild_tmp_dir" ]] || mkdir -p "$rpmbuild_tmp_dir"
 
-base_chroot_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
+distro_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
 chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
-# setup-ci-env.sh setup "base_chroot_dir" in "bin/kemumaki rpmbuild"
+# setup-ci-env.sh setup "distro_dir" in "bin/kemumaki rpmbuild"
 [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
-rsync -ax --delete ${base_chroot_dir}/ ${chroot_dir}/
+rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
 
 # for local repository
 case ${repo_uri} in
