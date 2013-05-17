@@ -2,7 +2,6 @@
 # rpm build script
 
 set -e
-#set -x
 
 . ./../config/rpmbuild.conf
 
@@ -28,9 +27,7 @@ base_distro_arch=${base_distro_arch:-$(arch)}
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
 execscript=${execscript:-}
-cacheback=${cacheback:-1}
 
-#arch=${arch:-$(arch)}
 arch=${base_distro_arch}
 case ${arch} in
 i*86)   basearch=i386; arch=i686;;
@@ -78,24 +75,6 @@ file:///*|/*)
 *)
   ;;
 esac
-
-### after-deploy
-case "${after_deploy}" in
-use-s3snap)
-  # skip deploying openvz.repo at "3rd-party.sh download"
-  cd ${dest_chroot_dir}/tmp
-
-  curl -O -R http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/snap/rhel/6/current/wakame-vdc-snap.repo
-  rsync -a ./wakame-vdc-snap.repo ${dest_chroot_dir}/etc/yum.repos.d/openvz.repo
-
-  [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
-  [ -d wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch} ] || mkdir -p wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}
-  rsync -a ./wakame-vdc-snap.repo wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}/openvz.repo
-  ;;
-*)
-  ;;
-esac
-### after-deploy
 
 for mount_target in proc dev; do
   mount | grep ${dest_chroot_dir}/${mount_target} || mount --bind /${mount_target} ${dest_chroot_dir}/${mount_target}
@@ -145,9 +124,5 @@ for mount_target in proc dev; do
     umount -l ${dest_chroot_dir}/${mount_target}
   }
 done
-
-[[ -z "${cacheback}" ]] || {
-  rsync -ax ${dest_chroot_dir}/var/cache/yum/ ${base_chroot_dir}/var/cache/yum/
-}
 
 echo "Complete!!"
