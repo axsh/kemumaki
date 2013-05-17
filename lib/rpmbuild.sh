@@ -22,7 +22,7 @@ while [ $# -gt 0 ]; do
 done
 
 base_distro=centos
-base_distro_number=${base_distro_number:-6}
+base_distro_number=6
 base_distro_arch=${base_distro_arch:-$(arch)}
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
