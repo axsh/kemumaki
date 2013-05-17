@@ -28,8 +28,7 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 
 arch=${base_distro_arch}
 case "${arch}" in
-  i*86) basearch=i386 arch=i686 ;;
-x86_64) basearch=${arch} ;;
+i*86) basearch=i386 arch=i686 ;;
 esac
 
 [[ $UID -ne 0 ]] && {
