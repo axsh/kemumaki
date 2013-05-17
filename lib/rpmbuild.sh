@@ -44,16 +44,7 @@ esac
 base_chroot_dir=${rpmbuild_tmp_dir}/chroot/base/${base_distro}-${base_distro_number}_${base_distro_arch}
 dest_chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${base_distro}-${base_distro_number}_${base_distro_arch}
 
-[ -d ${base_chroot_dir} ] || {
-  ${vmbuilder_dir}/kvm/rhel/6/cebootstrap.sh \
-   --distro_name=${base_distro} \
-   --distro_ver=${base_distro_number} \
-   --distro_arch=${base_distro_arch} \
-   --chroot_dir=${base_chroot_dir} \
-   --batch=1 \
-   --debug=1
-  sync
-}
+# setup-ci-env.sh setup "base_chroot_dir" in "bin/kemumaki rpmbuild"
 
 [ -d ${dest_chroot_dir} ] && {
   echo already exists: ${dest_chroot_dir} >&2
