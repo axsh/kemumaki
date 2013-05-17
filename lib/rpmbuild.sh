@@ -21,7 +21,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-base_distro=${base_distro:-centos}
+base_distro=centos
 base_distro_number=${base_distro_number:-6}
 base_distro_arch=${base_distro_arch:-$(arch)}
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
@@ -70,14 +70,7 @@ for mount_target in proc dev; do
 done
 
 yum_opts="--disablerepo='*'"
-case ${base_distro} in
-centos)
-  yum_opts="${yum_opts} --enablerepo=base"
-  ;;
-sl|scientific)
-  yum_opts="${yum_opts} --enablerepo=sl"
-  ;;
-esac
+yum_opts="${yum_opts} --enablerepo=base"
 
 cat <<EOS | setarch ${arch} chroot ${dest_chroot_dir}/  bash -ex
   uname -m
