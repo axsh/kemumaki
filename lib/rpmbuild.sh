@@ -63,6 +63,9 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
   cd wakame-vdc
 
+  # download lxc, rabbitmq-server and openvswitch
+  ./tests/vdc.sh.d/rhel/3rd-party.sh download
+
   yum-builddep -y rpmbuild/SPECS/*.spec
 
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
