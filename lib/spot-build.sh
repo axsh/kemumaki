@@ -38,7 +38,9 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 # Build step 'Execute shell' marked build as failure
 # Finished: FAILURE
 
-time REPO_URI=$(cd ${vdc_dir}/.git && pwd) VDC_BUILD_ID=${vdc_build_id} ./rules clean rpm
+for arch in ${archs}; do
+  time setarch ${arch} ./rpmbuild.sh --build-id=${vdc_build_id} --repo-uri=$(cd ${vdc_dir}/.git && pwd)
+done
 
 [[ -d ${rpm_dir} ]] &&  rm -rf ${rpm_dir} || :
 time ./createrepo-vdc.sh
