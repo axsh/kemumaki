@@ -39,7 +39,7 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 # Finished: FAILURE
 
 for arch in ${archs}; do
-  time setarch ${arch} ./rpmbild.sh --build-id=${vdc_build_id} --repo-uri=$(cd ${vdc_dir}/.git && pwd)
+  time setarch ${arch} ./rpmbuild.sh --build-id=${vdc_build_id} --repo-uri=$(cd ${vdc_dir}/.git && pwd)
 done
 
 [[ -d ${rpm_dir} ]] &&  rm -rf ${rpm_dir} || :
