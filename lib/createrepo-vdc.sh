@@ -5,7 +5,8 @@ set -e
 
 . ./../config/rpmbuild.conf
 
-[ -d ${rpm_dir} ] || mkdir -p ${rpm_dir}
+[ -d ${rpm_dir} ] && rm -rf ${rpm_dir}
+mkdir -p ${rpm_dir}
 
 for arch in ${archs}; do
   case ${arch} in
@@ -42,26 +43,6 @@ for arch in ${archs}; do
     bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/noarch/ || :"
   done
 done
-
-# cleanup old wakame-vdc rpms.
-for i in ${rpm_dir}/*/wakame*.rpm; do
-  file=$(basename $i)
-  echo ${file%%.el6.*.rpm}
-done \
- | sort \
- | uniq \
- | sort \
- | while read line; do
-     echo ${line##*-}
-   done \
-   | sort -r \
-   | uniq \
-   | cat -n \
-   | awk '$1 >= 5 {print $2}' \
-   | while read build_id; do
-       echo "delete ${build_id}"
-       find ${rpm_dir} -type f | grep ${build_id} | xargs rm
-     done
 
 # create repository metadata files.
 (
