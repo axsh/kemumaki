@@ -13,6 +13,7 @@ function setup_chroot_dir() {
     distro_dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${distro_arch}
     chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${distro_arch}
 
+    setarch ${distro_arch} \
     ../vmbuilder/kvm/rhel/6/vmbuilder.sh \
       --distro-name=${distro_name} \
       --distro-ver=${distro_ver}   \
