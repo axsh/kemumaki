@@ -59,9 +59,8 @@ for arch in ${archs}; do
   rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
 done
 
-vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
 for arch in ${archs}; do
-  time setarch ${arch} ./rpmbuild.sh --build-id=${vdc_build_id} --repo-uri=$(cd ${vdc_dir}/.git && pwd)
+  time setarch ${arch} ./rpmbuild.sh --build-id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") --repo-uri=$(cd ${vdc_dir}/.git && pwd)
 done
 
 [[ -d ${rpm_dir} ]] &&  rm -rf ${rpm_dir} || :
