@@ -77,8 +77,6 @@ for arch in ${archs}; do
   i686) basearch=i386 ;;
   esac
 
-  chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/centos-6_${arch}
-
   #
   # arch, basearch
   #
