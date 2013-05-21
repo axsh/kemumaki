@@ -41,13 +41,15 @@ chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${distro
 [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
 rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
 
-local_path=${repo_uri}
-[ -d ${chroot_dir}/${local_path} ] || mkdir -p ${chroot_dir}/${local_path}
-rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
-
 for mount_target in proc dev; do
   mount | grep ${chroot_dir}/${mount_target} || mount --bind /${mount_target} ${chroot_dir}/${mount_target}
 done
+
+###> execscript
+
+local_path=${repo_uri}
+[ -d ${chroot_dir}/${local_path} ] || mkdir -p ${chroot_dir}/${local_path}
+rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
@@ -64,6 +66,8 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
 EOS
+
+###< execscript
 
 for mount_target in proc dev; do
   mount | grep ${chroot_dir}/${mount_target} && umount -l ${chroot_dir}/${mount_target}
