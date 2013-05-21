@@ -68,7 +68,6 @@ function rpmbuild(){
   notify_rpmbuild started
   trap "notify_rpmbuild failed && exit 1" ERR
   cd ${lib_dir}
-  ./setup-ci-env.sh setup_chroot_dir
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
   trap - ERR
   notify_rpmbuild done
