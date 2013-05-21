@@ -30,6 +30,8 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
   exit 0
 } || :
 
+[[ -d ${rpm_dir} ]] &&  rm -rf ${rpm_dir} || :
+
 # exec 2>${release_id}.err
 #
 # Jenkins reported following errors.
@@ -42,7 +44,6 @@ for arch in ${archs}; do
   time setarch ${arch} ./rpmbuild.sh --build-id=${vdc_build_id} --repo-uri=$(cd ${vdc_dir}/.git && pwd)
 done
 
-[[ -d ${rpm_dir} ]] &&  rm -rf ${rpm_dir} || :
 time ./createrepo-vdc.sh
 
 [[ -d ${yum_repository_dir}/${vdc_branch} ]] || mkdir -p ${yum_repository_dir}/${vdc_branch}
