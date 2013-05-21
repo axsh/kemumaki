@@ -11,7 +11,6 @@ function setup_chroot_dir() {
   distro_subver="3"
   distro_ver="${distro_relver}"
 
-  distro="${distro_name}-${distro_ver}"
   distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
   for distro_arch in ${archs}; do
@@ -25,7 +24,7 @@ function setup_chroot_dir() {
     distro_targz_file=${distro_detail}_${distro_arch}.tar.gz
     [ -f ${distro_targz_file}            ] || curl -fkL -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_targz_file}
     [ -d ${distro_detail}_${distro_arch} ] || tar zxpf ${distro_targz_file}
-    [ -d ${distro}_${distro_arch}        ] || mv ${distro_detail}_${distro_arch} ${distro}_${distro_arch}
+    [ -d ${distro_name}-${distro_ver}_${distro_arch} ] || mv ${distro_detail}_${distro_arch} ${distro_name}-${distro_ver}_${distro_arch}
 
     [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
     rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
