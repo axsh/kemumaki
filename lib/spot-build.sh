@@ -74,7 +74,8 @@ for arch in ${archs}; do
   ## 3. pick rpms
   ##
   case ${arch} in
-  i686) basearch=i386 ;;
+  i686)   basearch=i386    ;;
+  x86_64) basearch=${arch} ;;
   esac
 
   #
