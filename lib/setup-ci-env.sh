@@ -7,9 +7,8 @@ set -e
 
 function setup_chroot_dir() {
   distro_name="centos"
-  distro_relver="6"
+  distro_ver="6"
   distro_subver="3"
-  distro_ver="${distro_relver}"
 
   distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
