@@ -43,25 +43,21 @@ distro_ver="6"
 distro_subver="4"
 distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
-# keep PWD in this process.
-(
 for arch in ${archs}; do
   base_dir=${rpmbuild_tmp_dir}/chroot/base
   [ -d ${base_dir} ] || mkdir -p ${base_dir}
-  cd ${base_dir}
 
   distro_dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${arch}
   chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${arch}
 
   distro_targz_file=${distro_detail}_${arch}.tar.gz
-  [ -f ${distro_targz_file}     ] || curl -fkL -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_targz_file}
-  [ -d ${distro_detail}_${arch} ] || tar zxpf ${distro_targz_file}
-  [ -d ${distro_dir}            ] || mv ${distro_detail}_${arch} ${distro_dir}
+  [ -f ${base_dir}/${distro_targz_file}     ] || curl -fkL http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_targz_file} -o ${base_dir}/${distro_targz_file}
+  [ -d ${base_dir}/${distro_detail}_${arch} ] || tar zxpf ${base_dir}/${distro_targz_file} -C ${base_dir}/
+  [ -d ${distro_dir}                        ] || mv ${base_dir}/${distro_detail}_${arch} ${distro_dir}
 
   [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
   rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
 done
-)
 
 vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
 for arch in ${archs}; do
