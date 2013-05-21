@@ -43,6 +43,8 @@ distro_ver="6"
 distro_subver="4"
 distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
+# keep PWD in this process.
+(
 for arch in ${archs}; do
   base_dir=${rpmbuild_tmp_dir}/chroot/base
   [ -d ${base_dir} ] || mkdir -p ${base_dir}
@@ -59,7 +61,7 @@ for arch in ${archs}; do
   [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
   rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
 done
-
+)
 
 vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
 for arch in ${archs}; do
