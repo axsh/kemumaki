@@ -43,7 +43,13 @@ distro_ver="6"
 distro_subver="4"
 distro_detail="${distro_name}-${distro_ver}.${distro_subver}"
 
+[[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir} || :
+
 for arch in ${archs}; do
+  ##
+  ## 1. setup chroot_dir
+  ##
+
   base_dir=${rpmbuild_tmp_dir}/chroot/base
   [ -d ${base_dir} ] || mkdir -p ${base_dir}
 
@@ -57,14 +63,16 @@ for arch in ${archs}; do
 
   [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
   rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
-done
 
-for arch in ${archs}; do
+  ##
+  ## 2. build rpms
+  ##
+
   time setarch ${arch} ./rpmbuild.sh --build-id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") --repo-uri=$(cd ${vdc_dir}/.git && pwd)
-done
 
-[[ -d ${rpm_dir} ]] &&  rm -rf ${rpm_dir} || :
-for arch in ${archs}; do
+  ##
+  ## 3. pick rpms
+  ##
   case ${arch} in
   i686) basearch=i386 ;;
   esac
