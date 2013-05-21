@@ -51,7 +51,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.4.4 >> /etc/resolv.conf
 
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
-  yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils
+  yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
 
   cd /tmp
   [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
