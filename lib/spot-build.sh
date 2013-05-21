@@ -17,8 +17,6 @@ vdc_branch=$2
   exit 1
 }
 
-vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
-
 [[ $UID -ne 0 ]] && {
   echo "ERROR: Run as root" >/dev/stderr
   exit 1
@@ -40,6 +38,7 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 # Build step 'Execute shell' marked build as failure
 # Finished: FAILURE
 
+vdc_build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
 for arch in ${archs}; do
   time setarch ${arch} ./rpmbuild.sh --build-id=${vdc_build_id} --repo-uri=$(cd ${vdc_dir}/.git && pwd)
 done
