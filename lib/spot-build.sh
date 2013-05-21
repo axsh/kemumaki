@@ -46,8 +46,7 @@ done
 
 for arch in ${archs}; do
   case ${arch} in
-  i*86)   basearch=i386; arch=i686;;
-  x86_64) basearch=${arch};;
+  i686) basearch=i386 ;;
   esac
 
   chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/centos-6_${arch}
