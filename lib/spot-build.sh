@@ -38,33 +38,9 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 
 (cd .. &&  git submodule update --init)
 
-distro_detail=centos-6.4
-
 [[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir} || :
 
 for arch in ${archs}; do
-  ##
-  ## 1. setup chroot_dir
-  ##
-
-  base_dir=${rpmbuild_tmp_dir}/chroot/base
-  [ -d ${base_dir} ] || mkdir -p ${base_dir}
-
-  distro_dir=${rpmbuild_tmp_dir}/chroot/base/centos-6_${arch}
-  chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/centos-6_${arch}
-
-  distro_targz_file=${distro_detail}_${arch}.tar.gz
-  [ -f ${base_dir}/${distro_targz_file}     ] || curl -fkL http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/rootfs-tree/${distro_targz_file} -o ${base_dir}/${distro_targz_file}
-  [ -d ${base_dir}/${distro_detail}_${arch} ] || tar zxpf ${base_dir}/${distro_targz_file} -C ${base_dir}/
-  [ -d ${distro_dir}                        ] || mv ${base_dir}/${distro_detail}_${arch} ${distro_dir}
-
-  [[ -d "${chroot_dir}" ]] || mkdir -p ${chroot_dir}
-  rsync -ax --delete ${distro_dir}/ ${chroot_dir}/
-
-  ##
-  ## 2. build rpms
-  ##
-
   time build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") repo_uri=$(cd ${vdc_dir}/.git && pwd) setarch ${arch} ./rpmbuild.sh
 done
 
