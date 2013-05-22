@@ -12,7 +12,7 @@ set -e
 vdc_dir=$1
 vdc_branch=$2
 
-[[ -d ${vdc_dir} ]] || {
+[[ -d "${vdc_dir}" ]] || {
   echo "ERROR: repository not found: ${vdc_dir}" >/dev/stderr
   exit 1
 }
@@ -21,21 +21,18 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 
 (cd .. &&  git submodule update --init)
 
-[[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir} || :
+[[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir}
 
 for arch in ${archs}; do
   time build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") repo_uri=$(cd ${vdc_dir}/.git && pwd) setarch ${arch} ./rpmbuild.sh
 done
 
-# create repository metadata files.
 (
- cd ${rpm_dir}
- createrepo .
+  cd ${rpm_dir}
+  createrepo .
 )
 
-# generate index
 ./gen-index-html.sh > ${rpm_dir}/index.html
-
 
 [[ -d ${yum_repository_dir}/${vdc_branch} ]] || mkdir -p ${yum_repository_dir}/${vdc_branch}
 
