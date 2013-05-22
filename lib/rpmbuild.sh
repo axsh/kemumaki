@@ -53,43 +53,26 @@ EOS
 ## 3. pick rpms
 ##
 
-#
-# arch, basearch
-#
-arch=${distro_arch}
-case ${arch} in
-  i686) basearch=i386    ;;
-x86_64) basearch=${arch} ;;
-esac
+for arch in ${distro_arch} noarch; do
+  # mapping arch:basearch pair
+  case "${arch}" in
+    i686) basearch=i386    ;;
+  x86_64) basearch=x86_64  ;;
+  noarch) basearch=noarch  ;;
+  esac
 
-[[   -d "${rpm_dir}/${basearch}" ]] && rm -rf ${rpm_dir}/${basearch}
-mkdir -p ${rpm_dir}/${basearch}
+  [[   -d "${rpm_dir}/${basearch}" ]] && rm -rf ${rpm_dir}/${basearch}
+  mkdir -p ${rpm_dir}/${basearch}
 
-subdirs="
-  tmp/wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}
-     root/rpmbuild/RPMS/${arch}
-  ${HOME}/rpmbuild/RPMS/${arch}
-"
-for subdir in ${subdirs}; do
-  pkg_dir=${chroot_dir}/${subdir}
-  bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/ || :"
-done
-
-#
-# noarch
-#
-    arch=noarch
-basearch=noarch
-[[   -d "${rpm_dir}/${basearch}" ]] && rm -rf ${rpm_dir}/${basearch}
-mkdir -p ${rpm_dir}/${basearch}
-
-subdirs="
-     root/rpmbuild/RPMS/${arch}
-  ${HOME}/rpmbuild/RPMS/${arch}
-"
-for subdir in ${subdirs}; do
-  pkg_dir=${chroot_dir}/${subdir}
-  bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/ || :"
+  subdirs="
+    tmp/wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}
+       root/rpmbuild/RPMS/${arch}
+    ${HOME}/rpmbuild/RPMS/${arch}
+  "
+  for subdir in ${subdirs}; do
+    pkg_dir=${chroot_dir}/${subdir}
+    bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/ || :"
+  done
 done
 
 ###< execscript
