@@ -6,7 +6,7 @@ set -e
 . ./../config/rpmbuild.conf
 
 distro_name=centos
-distro_ver=6
+distro_ver=6.4
 distro_arch=$(arch)
 
 [[ -d "${rpmbuild_tmp_dir}" ]] || mkdir -p "${rpmbuild_tmp_dir}"
@@ -20,6 +20,7 @@ export build_id
 ../vmbuilder/kvm/rhel/6/vmbuilder.sh \
  --distro-name=${distro_name} \
  --distro-ver=${distro_ver}   \
- --execscript=xexecscript.d/rpmbuild.sh \
+ --distro-dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${distro_arch} \
+ --execscript=xexecscript.sh  \
  --raw=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}.raw
 )
