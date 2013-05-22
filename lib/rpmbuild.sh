@@ -49,10 +49,48 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
 EOS
 
+##
+## 3. pick rpms
+##
+arch=${distro_arch}
+case ${arch} in
+i686)   basearch=i386    ;;
+x86_64) basearch=${arch} ;;
+esac
+
+#
+# arch, basearch
+#
+[[ -d "${rpm_dir}/${basearch}" ]] && rm -rf ${rpm_dir}/${basearch}
+mkdir -p ${rpm_dir}/${basearch}
+
+subdirs="
+  tmp/wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}
+     root/rpmbuild/RPMS/${arch}
+  ${HOME}/rpmbuild/RPMS/${arch}
+"
+for subdir in ${subdirs}; do
+  pkg_dir=${chroot_dir}/${subdir}
+  bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/ || :"
+done
+
+#
+# noarch
+#
+[[ -d "${rpm_dir}/noarch" ]] && rm -rf ${rpm_dir}/noarch
+mkdir -p ${rpm_dir}/noarch
+
+subdirs="
+     root/rpmbuild/RPMS/noarch
+  ${HOME}/rpmbuild/RPMS/noarch
+"
+for subdir in ${subdirs}; do
+  pkg_dir=${chroot_dir}/${subdir}
+  bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/noarch/ || :"
+done
+
 ###< execscript
 
 for mount_target in proc dev; do
   mount | grep ${chroot_dir}/${mount_target} && umount -l ${chroot_dir}/${mount_target}
 done
-
-echo "Complete!!"

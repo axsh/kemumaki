@@ -66,41 +66,6 @@ for arch in ${archs}; do
   ##
 
   time build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") repo_uri=$(cd ${vdc_dir}/.git && pwd) setarch ${arch} ./rpmbuild.sh
-
-  ##
-  ## 3. pick rpms
-  ##
-  case ${arch} in
-  i686)   basearch=i386    ;;
-  x86_64) basearch=${arch} ;;
-  esac
-
-  #
-  # arch, basearch
-  #
-  [ -d ${rpm_dir}/${basearch} ] || mkdir -p ${rpm_dir}/${basearch}
-  subdirs="
-    tmp/wakame-vdc/tests/vdc.sh.d/rhel/vendor/${basearch}
-    root/rpmbuild/RPMS/${arch}
-    ${HOME}/rpmbuild/RPMS/${arch}
-  "
-  for subdir in ${subdirs}; do
-    pkg_dir=${chroot_dir}/${subdir}
-    bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/ || :"
-  done
-
-  #
-  # noarch
-  #
-  [ -d ${rpm_dir}/noarch ] || mkdir -p ${rpm_dir}/noarch
-  subdirs="
-    root/rpmbuild/RPMS/noarch
-    ${HOME}/rpmbuild/RPMS/noarch
-  "
-  for subdir in ${subdirs}; do
-    pkg_dir=${chroot_dir}/${subdir}
-    bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/noarch/ || :"
-  done
 done
 
 # create repository metadata files.
