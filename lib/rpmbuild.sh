@@ -24,5 +24,6 @@ export rpm_dir
  --distro-ver=${distro_ver}   \
  --distro-dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${distro_arch} \
  --execscript=$(pwd)/xexecscript.sh  \
+ --hypervisor=null \
  --raw=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}.raw
 )
