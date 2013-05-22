@@ -17,20 +17,7 @@ vdc_branch=$2
   exit 1
 }
 
-[[ $UID -ne 0 ]] && {
-  echo "ERROR: Run as root" >/dev/stderr
-  exit 1
-}
-
 release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
-
-# exec 2>${release_id}.err
-#
-# Jenkins reported following errors.
-#
-# + exec
-# Build step 'Execute shell' marked build as failure
-# Finished: FAILURE
 
 (cd .. &&  git submodule update --init)
 
