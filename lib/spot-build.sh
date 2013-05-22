@@ -23,10 +23,6 @@ vdc_branch=$2
 }
 
 release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
-[[ -f ${release_id}.tar.gz ]] && {
-  echo "already built: ${release_id}" >/dev/stderr
-  exit 0
-} || :
 
 # exec 2>${release_id}.err
 #
