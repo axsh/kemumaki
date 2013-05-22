@@ -57,9 +57,6 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
   cd ${yum_repository_dir}/${vdc_branch}
   [[ -d ${release_id} ]] && rm -rf ${release_id}
   rsync -avx ${rpm_dir}/ ${release_id}
-
-  tar zcvpf ${release_id}.tar.gz ${release_id}
-  ls -la ${release_id}.tar.gz
 )
 
 [[ -L ${yum_repository_dir}/${vdc_branch}/current ]] && rm ${yum_repository_dir}/${vdc_branch}/current
