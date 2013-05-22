@@ -38,6 +38,7 @@ for arch in ${archs}; do
 
     time setarch ${arch} \
      ../vmbuilder/kvm/rhel/6/vmbuilder.sh \
+     --swapsize=0 \
      --execscript=$(pwd)/xexecscript.sh  \
      --hypervisor=null \
      --distro-name=${distro_name} \
