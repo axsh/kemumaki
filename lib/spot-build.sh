@@ -31,6 +31,7 @@ for arch in ${archs}; do
     export build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
     export rpm_dir
 
+    # for vmbuilder.sh options
     distro_name=centos
     distro_ver=6.4
     distro_arch=${arch}
