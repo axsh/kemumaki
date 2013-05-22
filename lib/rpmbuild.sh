@@ -71,7 +71,8 @@ for arch in ${distro_arch} noarch; do
   "
   for subdir in ${subdirs}; do
     pkg_dir=${chroot_dir}/${subdir}
-    bash -c "[ -d ${pkg_dir} ] && rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/ || :"
+    [[ -d "${pkg_dir}" ]] || continue
+    rsync -av --exclude=epel-* --exclude=elrepo-* ${pkg_dir}/*.rpm ${rpm_dir}/${basearch}/
   done
 done
 
