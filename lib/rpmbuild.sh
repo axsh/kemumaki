@@ -16,7 +16,7 @@ repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
   exit 1
 }
 
-[[ -d "$rpmbuild_tmp_dir" ]] || mkdir -p "$rpmbuild_tmp_dir"
+[[ -d "${rpmbuild_tmp_dir}" ]] || mkdir -p "${rpmbuild_tmp_dir}"
 
 chroot_dir=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${distro_arch}
 
@@ -27,7 +27,7 @@ done
 ###> execscript
 
 local_path=${repo_uri}
-[ -d ${chroot_dir}/${local_path} ] || mkdir -p ${chroot_dir}/${local_path}
+[[ -d ${chroot_dir}/${local_path} ]] || mkdir -p ${chroot_dir}/${local_path}
 rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
@@ -38,7 +38,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
 
   cd /tmp
-  [ -d wakame-vdc ] || git clone ${repo_uri} wakame-vdc
+  [[ -d wakame-vdc ]] || git clone ${repo_uri} wakame-vdc
   cd wakame-vdc
 
   # download lxc, rabbitmq-server and openvswitch
