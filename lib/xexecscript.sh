@@ -38,7 +38,7 @@ EOS
 
 [[ -n "${rpm_dir}" ]] || exit 1
 
-for arch in ${distro_arch} noarch; do
+for arch in $(arch) noarch; do
   # mapping arch:basearch pair
   case "${arch}" in
     i686) basearch=i386    ;;
