@@ -24,6 +24,7 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 [[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir}
 
 for arch in ${archs}; do
+  [[ -d "${rpmbuild_tmp_dir}" ]] || mkdir -p "${rpmbuild_tmp_dir}"
   time build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") repo_uri=$(cd ${vdc_dir}/.git && pwd) setarch ${arch} ./rpmbuild.sh
 done
 
