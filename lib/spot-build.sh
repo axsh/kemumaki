@@ -65,7 +65,7 @@ for arch in ${archs}; do
   ## 2. build rpms
   ##
 
-  time setarch ${arch} ./rpmbuild.sh --build-id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") --repo-uri=$(cd ${vdc_dir}/.git && pwd)
+  time build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h") repo_uri=$(cd ${vdc_dir}/.git && pwd) setarch ${arch} ./rpmbuild.sh
 
   ##
   ## 3. pick rpms

@@ -6,7 +6,7 @@ set -e
 . ./../config/rpmbuild.conf
 
 # add noarch to basearchs
-basearchs="${basearchs} noarch"
+basearchs="x86_64 i386 noarch"
 
 release_id=$(
   for basearch in ${basearchs}; do

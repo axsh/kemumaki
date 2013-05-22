@@ -5,22 +5,6 @@ set -e
 
 . ./../config/rpmbuild.conf
 
-args=
-while [ $# -gt 0 ]; do
-  arg="$1"
-  case "${arg}" in
-    --*=*)
-      key=${arg%%=*}; key=$(echo ${key##--} | tr - _)
-      value=${arg##--*=}
-      eval "${key}=\"${value}\""
-      ;;
-    *)
-      args="${args} ${arg}"
-      ;;
-  esac
-  shift
-done
-
 distro_name=centos
 distro_ver=6
 distro_arch=$(arch)
