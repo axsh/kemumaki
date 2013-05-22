@@ -26,6 +26,7 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 for arch in ${archs}; do
   [[ -d "${rpmbuild_tmp_dir}" ]] || mkdir -p "${rpmbuild_tmp_dir}"
   (
+    # for xexecscript.sh internal parameters
     export repo_uri=$(cd ${vdc_dir}/.git && pwd)
     export build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
     export rpm_dir
