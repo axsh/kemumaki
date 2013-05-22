@@ -16,6 +16,8 @@ distro_arch=$(arch)
 # spot-build.sh sets "repo_uri" and "build_id" parameter.
 export repo_uri
 export build_id
+#
+export rpm_dir
 
 ../vmbuilder/kvm/rhel/6/vmbuilder.sh \
  --distro-name=${distro_name} \

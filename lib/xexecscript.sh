@@ -36,7 +36,7 @@ EOS
 ## 3. pick rpms
 ##
 
-. ./../config/rpmbuild.conf
+[[ -n "${rpm_dir}" ]] && exit 1
 
 for arch in ${distro_arch} noarch; do
   # mapping arch:basearch pair
