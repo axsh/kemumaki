@@ -19,7 +19,9 @@ vdc_branch=$2
 
 (cd .. &&  git submodule update --init)
 
-[[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir}
+if [[ -d ${rpm_dir} ]]; then
+  rm -rf ${rpm_dir}
+fi
 [[ -d "${rpmbuild_tmp_dir}" ]] || mkdir -p "${rpmbuild_tmp_dir}"
 
 for arch in ${archs}; do
@@ -55,7 +57,9 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 
 (
   cd ${yum_repository_dir}/${vdc_branch}
-  [[ -d ${release_id} ]] && rm -rf ${release_id}
+  if [[ -d ${release_id} ]]; then
+    rm -rf ${release_id}
+  fi
   rsync -avx ${rpm_dir}/ ${release_id}
 )
 
