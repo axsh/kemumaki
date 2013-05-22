@@ -38,7 +38,7 @@ done
 
 (
   cd ${yum_repository_dir}/${vdc_branch}
-  [[ -d ${release_id} ]] && rm -rf ${release_id} || :
+  [[ -d ${release_id} ]] && rm -rf ${release_id}
   rsync -avx ${rpm_dir}/ ${release_id}
 
   tar zcvpf ${release_id}.tar.gz ${release_id}
