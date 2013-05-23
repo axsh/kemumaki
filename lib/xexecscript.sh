@@ -8,6 +8,7 @@ set -e
 declare chroot_dir=$1
 
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
+[[ -n "${rpm_dir}" ]] || exit 1
 
 local_path=${repo_uri}
 [[ -d ${chroot_dir}/${local_path} ]] || mkdir -p ${chroot_dir}/${local_path}
@@ -32,11 +33,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
 EOS
 
-##
-## 3. pick rpms
-##
-
-[[ -n "${rpm_dir}" ]] || exit 1
+# pick rpms
 
 for arch in $(arch) noarch; do
   # mapping arch:basearch pair
