@@ -2,7 +2,7 @@
 
 set -e
 
-. ./../config/rpmbuild.conf
+. $(cd $(dirname ${BASH_SOURCE[0]}) && pwd)/../config/rpmbuild.conf
 
 # add noarch to basearchs
 basearchs="x86_64 i386 noarch"

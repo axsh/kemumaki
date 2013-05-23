@@ -7,11 +7,11 @@ set -e
 
 declare chroot_dir=$1
 
-repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
+[[ -n "${local_repo_path}" ]] || exit 1
+[[ -n "${rpm_dir}"         ]] || exit 1
 
-local_path=${repo_uri}
-[[ -d ${chroot_dir}/${local_path} ]] || mkdir -p ${chroot_dir}/${local_path}
-rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
+[[ -d ${chroot_dir}/${local_repo_path} ]] || mkdir -p ${chroot_dir}/${local_repo_path}
+rsync -avx ${local_repo_path}/ ${chroot_dir}/${local_repo_path}
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.8.8 >> /etc/resolv.conf
@@ -21,7 +21,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
 
   cd /tmp
-  [[ -d wakame-vdc ]] || git clone ${repo_uri} wakame-vdc
+  [[ -d wakame-vdc ]] || git clone ${local_repo_path} wakame-vdc
   cd wakame-vdc
 
   # download lxc, rabbitmq-server and openvswitch
@@ -29,14 +29,10 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   yum-builddep -y rpmbuild/SPECS/*.spec
 
-  VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
+  VDC_BUILD_ID=$(cd ${local_repo_path}/../ && git log -n 1 --pretty=format:"%h") VDC_REPO_URI=${local_repo_path} ./rpmbuild/rules binary-snap
 EOS
 
-##
-## 3. pick rpms
-##
-
-[[ -n "${rpm_dir}" ]] || exit 1
+# pick rpms
 
 for arch in $(arch) noarch; do
   # mapping arch:basearch pair

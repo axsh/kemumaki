@@ -6,7 +6,7 @@
 #
 set -e
 
-. ./../config/rpmbuild.conf
+. $(cd $(dirname ${BASH_SOURCE[0]}) && pwd)/../config/rpmbuild.conf
 
 vdc_dir=$1
 vdc_branch=${2:-master}
@@ -16,7 +16,7 @@ vdc_branch=${2:-master}
   exit 1
 }
 
-(cd .. &&  git submodule update --init)
+(cd ${abs_dirname} && git submodule update --init)
 
 [[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir}
 
@@ -24,8 +24,7 @@ for arch in ${archs}; do
   [[ -d "${rpmbuild_tmp_dir}" ]] || mkdir -p "${rpmbuild_tmp_dir}"
   (
     # for xexecscript.sh internal parameters
-    export repo_uri=$(cd ${vdc_dir}/.git && pwd)
-    export build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
+    export local_repo_path=$(cd ${vdc_dir}/.git && pwd)
     export rpm_dir
 
     # for vmbuilder.sh options
@@ -34,9 +33,9 @@ for arch in ${archs}; do
     distro_arch=${arch}
 
     time setarch ${arch} \
-     ../vmbuilder/kvm/rhel/6/vmbuilder.sh \
+     ${abs_dirname}/vmbuilder/kvm/rhel/6/vmbuilder.sh \
      --swapsize=0 \
-     --execscript=$(pwd)/xexecscript.sh  \
+     --execscript=${abs_dirname}/lib/xexecscript.sh  \
      --hypervisor=null \
      --distro-name=${distro_name} \
      --distro-ver=${distro_ver}   \
@@ -50,7 +49,7 @@ done
   createrepo .
 )
 
-./gen-index-html.sh > ${rpm_dir}/index.html
+${abs_dirname}/lib/gen-index-html.sh > ${rpm_dir}/index.html
 
 [[ -d ${yum_repository_dir}/${vdc_branch} ]] || mkdir -p ${yum_repository_dir}/${vdc_branch}
 release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
