@@ -5,7 +5,6 @@
 #   rsync, tar, ls
 #
 set -e
-#set -x
 
 . ./../config/rpmbuild.conf
 
