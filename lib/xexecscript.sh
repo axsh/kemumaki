@@ -10,9 +10,9 @@ declare chroot_dir=$1
 repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
 [[ -n "${rpm_dir}" ]] || exit 1
 
-local_path=${repo_uri}
-[[ -d ${chroot_dir}/${local_path} ]] || mkdir -p ${chroot_dir}/${local_path}
-rsync -avx ${local_path}/ ${chroot_dir}/${local_path}
+local_repo_path=${repo_uri}
+[[ -d ${chroot_dir}/${local_repo_path} ]] || mkdir -p ${chroot_dir}/${local_repo_path}
+rsync -avx ${local_repo_path}/ ${chroot_dir}/${local_repo_path}
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.8.8 >> /etc/resolv.conf
