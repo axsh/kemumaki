@@ -10,7 +10,7 @@ set -e
 . ./../config/rpmbuild.conf
 
 vdc_dir=$1
-vdc_branch=$2
+vdc_branch=${2:-master}
 
 [[ -d "${vdc_dir}" ]] || {
   echo "ERROR: repository not found: ${vdc_dir}" >/dev/stderr
