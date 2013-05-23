@@ -29,7 +29,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   yum-builddep -y rpmbuild/SPECS/*.spec
 
-  VDC_BUILD_ID=${build_id} VDC_REPO_URI=${local_repo_path} ./rpmbuild/rules binary-snap
+  VDC_BUILD_ID=$(cd ${local_repo_path}/../ && git log -n 1 --pretty=format:"%h") VDC_REPO_URI=${local_repo_path} ./rpmbuild/rules binary-snap
 EOS
 
 # pick rpms

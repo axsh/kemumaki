@@ -25,7 +25,6 @@ for arch in ${archs}; do
   (
     # for xexecscript.sh internal parameters
     export local_repo_path=$(cd ${vdc_dir}/.git && pwd)
-    export build_id=$(cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
     export rpm_dir
 
     # for vmbuilder.sh options
