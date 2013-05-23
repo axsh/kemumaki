@@ -17,8 +17,6 @@ vdc_branch=$2
   exit 1
 }
 
-release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
-
 (cd .. &&  git submodule update --init)
 
 [[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir}
@@ -56,6 +54,7 @@ done
 ./gen-index-html.sh > ${rpm_dir}/index.html
 
 [[ -d ${yum_repository_dir}/${vdc_branch} ]] || mkdir -p ${yum_repository_dir}/${vdc_branch}
+release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
 
 (
   cd ${yum_repository_dir}/${vdc_branch}
