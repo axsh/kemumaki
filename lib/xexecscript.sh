@@ -7,8 +7,8 @@ set -e
 
 declare chroot_dir=$1
 
-repo_uri=${repo_uri:-git://github.com/axsh/wakame-vdc.git}
-[[ -n "${rpm_dir}" ]] || exit 1
+[[ -n "${repo_uri}" ]] || exit 1
+[[ -n "${rpm_dir}"  ]] || exit 1
 
 local_repo_path=${repo_uri}
 [[ -d ${chroot_dir}/${local_repo_path} ]] || mkdir -p ${chroot_dir}/${local_repo_path}
