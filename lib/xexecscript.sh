@@ -7,10 +7,9 @@ set -e
 
 declare chroot_dir=$1
 
-[[ -n "${repo_uri}" ]] || exit 1
-[[ -n "${rpm_dir}"  ]] || exit 1
+[[ -n "${local_repo_path}" ]] || exit 1
+[[ -n "${rpm_dir}"         ]] || exit 1
 
-local_repo_path=${repo_uri}
 [[ -d ${chroot_dir}/${local_repo_path} ]] || mkdir -p ${chroot_dir}/${local_repo_path}
 rsync -avx ${local_repo_path}/ ${chroot_dir}/${local_repo_path}
 
@@ -22,7 +21,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
 
   cd /tmp
-  [[ -d wakame-vdc ]] || git clone ${repo_uri} wakame-vdc
+  [[ -d wakame-vdc ]] || git clone ${local_repo_path} wakame-vdc
   cd wakame-vdc
 
   # download lxc, rabbitmq-server and openvswitch
@@ -30,7 +29,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   yum-builddep -y rpmbuild/SPECS/*.spec
 
-  VDC_BUILD_ID=${build_id} VDC_REPO_URI=${repo_uri} ./rpmbuild/rules binary-snap
+  VDC_BUILD_ID=${build_id} VDC_REPO_URI=${local_repo_path} ./rpmbuild/rules binary-snap
 EOS
 
 # pick rpms
