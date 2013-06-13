@@ -9,7 +9,9 @@ basearchs="x86_64 i386 noarch"
 
 release_id=$(
   for basearch in ${basearchs}; do
+    [[ -d "${rpm_dir}/${basearch}" ]] || continue
     for i in ${rpm_dir}/${basearch}/wakame*.rpm; do
+      [[ -f "${i}" ]] || continue
       file=$(basename $i)
       prefix=${file%%.el6.*.rpm}
       echo ${prefix##*-}
