@@ -48,6 +48,7 @@ function initialize(){
   # vdc
   vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.git}}
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
+  vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
   vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
 
   # vmapp
