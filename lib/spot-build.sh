@@ -41,7 +41,7 @@ for arch in ${archs}; do
      --hypervisor=null \
      --distro-name=${distro_name} \
      --distro-ver=${distro_ver}   \
-     --distro-dir=${rpmbuild_tmp_dir}/chroot/base/${distro_name}-${distro_ver}_${distro_arch} \
+     --distro-dir=/var/tmp/vmbuilder/${distro_name}-${distro_ver}_${distro_arch} \
             --raw=${raw_path}
 
     # make sure to remove working raw file
