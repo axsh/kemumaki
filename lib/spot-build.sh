@@ -32,7 +32,7 @@ for arch in ${archs}; do
     distro_ver=6.4
     distro_arch=${arch}
 
-    raw_path=${rpmbuild_tmp_dir}/chroot/dest/${distro_name}-${distro_ver}_${distro_arch}.raw
+    raw_path=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}.raw
 
     time setarch ${arch} \
      ${abs_dirname}/vmbuilder/kvm/rhel/6/vmbuilder.sh \
