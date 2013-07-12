@@ -65,5 +65,7 @@ release_id=$(cd ${vdc_dir} && rpmbuild/helpers/gen-release-id.sh)
   rsync -avx ${rpm_dir}/ ${release_id}
 )
 
+[[ -d ${rpm_dir} ]] && rm -rf ${rpm_dir}
+
 [[ -L ${yum_repository_dir}/${vdc_branch}/current ]] && rm ${yum_repository_dir}/${vdc_branch}/current
 ln -s ${yum_repository_dir}/${vdc_branch}/${release_id} ${yum_repository_dir}/${vdc_branch}/current
