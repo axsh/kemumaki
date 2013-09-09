@@ -32,7 +32,7 @@ for arch in ${archs}; do
     distro_ver=6.4
     distro_arch=${arch}
 
-    raw_path=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}.raw
+    rootfs_dir=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}
 
     time setarch ${arch} \
      ${abs_dirname}/vmbuilder/kvm/rhel/6/vmbuilder.sh \
@@ -42,10 +42,10 @@ for arch in ${archs}; do
      --distro-name=${distro_name} \
      --distro-ver=${distro_ver}   \
      --distro-dir=/var/tmp/vmbuilder/${distro_name}-${distro_ver}_${distro_arch} \
-            --raw=${raw_path}
+     --rootfs_dir=${rootfs_dir} --diskless
 
-    # make sure to remove working raw file
-    [[ -f ${raw_path} ]] && rm ${raw_path}
+    # make sure to remove working directory
+    [[ -d ${rootfs_dir} ]] && rm -r ${rootfs_dir}
   )
 done
 
