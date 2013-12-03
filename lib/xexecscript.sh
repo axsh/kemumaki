@@ -21,6 +21,10 @@ gpgcheck=0
 EOS
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
+  sed -i s,\$releasever,${distro_ver},g /etc/yum.repos.d/CentOS-Base.repo
+EOS
+
+chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.8.8 >> /etc/resolv.conf
   echo nameserver 8.8.4.4 >> /etc/resolv.conf
 
