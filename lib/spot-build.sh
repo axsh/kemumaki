@@ -37,7 +37,7 @@ for arch in ${archs}; do
     time setarch ${arch} \
      ${abs_dirname}/vmbuilder/kvm/rhel/6/vmbuilder.sh \
      --swapsize=0 \
-     --execscript=${abs_dirname}/lib/xexecscript.sh  \
+     --xexecscript=${abs_dirname}/lib/xexecscript.sh  \
      --hypervisor=null \
      --distro-name=${distro_name} \
      --distro-ver=${distro_ver}   \
