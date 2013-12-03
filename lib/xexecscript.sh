@@ -20,9 +20,7 @@ baseurl=http://dlc.wakame.axsh.jp/packages/3rd/rhel/6/master/
 gpgcheck=0
 EOS
 
-chroot ${chroot_dir} $SHELL -ex <<EOS
-  sed -i s,\$releasever,${distro_ver},g /etc/yum.repos.d/CentOS-Base.repo
-EOS
+sed -i s,\$releasever,${distro_ver},g ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.8.8 >> /etc/resolv.conf
