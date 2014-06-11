@@ -18,5 +18,3 @@ vdc_branch=master
 
 report_dir=/var/www/html/reports
 report_url_prefix=reports
-
-test_timeout=$((60 * 30))
