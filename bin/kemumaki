@@ -10,10 +10,6 @@ function checkroot() {
   } || :
 }
 
-function update_path(){
-  export PATH=$PATH:${vdc_dir}/client/mussel
-}
-
 function update_vdc(){
   sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
 }
@@ -38,8 +34,6 @@ function sync_repo(){
 }
 
 function prepare(){
-  update_path
-
   if [[ "${run_mode}" = standalone ]]; then
     [[ -d ${vdc_dir} ]] || {
       ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir}) )
