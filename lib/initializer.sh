@@ -26,10 +26,6 @@ function initialize(){
   
   run_mode=${run_mode:-jenkins}
 
-  # dcmgr settings
-  dcmgr_host=${DCMGR_HOST:-${dcmgr_host:-10.0.2.15}}
-  dcmgr_port=${DCMGR_PORT:-${dcmgr_port:-9001}}
-
   # kemumaki
   kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
   kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}

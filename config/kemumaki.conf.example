@@ -10,10 +10,6 @@ run_mode=standalone
 # set -x if true
 debug=false
 
-# dcmgr settings
-dcmgr_host=10.0.2.15
-dcmgr_port=9001
-
 kemumaki_repo_url=git://github.com/axsh/kemumaki.git
 kemumaki_branch=master
 
