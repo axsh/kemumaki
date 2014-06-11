@@ -26,15 +26,6 @@ function initialize(){
   
   run_mode=${run_mode:-jenkins}
 
-  # dcmgr settings
-  dcmgr_host=${DCMGR_HOST:-${dcmgr_host:-10.0.2.15}}
-  dcmgr_port=${DCMGR_PORT:-${dcmgr_port:-9001}}
-
-  # mysql settings
-  mysql_host=${mysql_host:-${dcmgr_host}}
-  mysql_user=${mysql_user:-root}
-  mysql_database=${mysql_database:-wakame_dcmgr}
-
   # kemumaki
   kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
   kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
@@ -48,8 +39,6 @@ function initialize(){
   # vmapp
   vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
   vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-all}}
-
-  ssh_opts=${ssh_opts:-"-o StrictHostKeyChecking=no"}
 
   test_timeout=${TEST_TIMEOUT:-${test_timeout:-$((60 * 30))}}
 

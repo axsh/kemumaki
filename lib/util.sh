@@ -10,10 +10,6 @@ function checkroot() {
   } || :
 }
 
-function run_ssh(){
-  ssh ${ssh_opts} $*
-}
-
 function vdc_build_id(){
   (cd ${vdc_dir} && git log -n 1 --pretty=format:"%h")
 }

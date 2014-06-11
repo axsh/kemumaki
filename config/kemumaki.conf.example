@@ -10,24 +10,11 @@ run_mode=standalone
 # set -x if true
 debug=false
 
-# dcmgr settings
-dcmgr_host=10.0.2.15
-dcmgr_port=9001
-
-# mysql settings
-mysql_host=${dcmgr_host}
-mysql_user=root
-mysql_database=wakame_dcmgr
-
 kemumaki_repo_url=git://github.com/axsh/kemumaki.git
 kemumaki_branch=master
 
 vdc_repo_url=git://github.com/axsh/wakame-vdc.git
 vdc_branch=master
-vdc_yum_repo_host=192.168.2.50
-
-#ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ssh_opts="-o StrictHostKeyChecking=no"
 
 report_dir=/var/www/html/reports
 report_url_prefix=reports
