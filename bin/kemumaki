@@ -59,52 +59,6 @@ function rpmbuild(){
   echo "rpmbuild: done"
 }
 
-function run_tests(){
-  [[ $# -ge 1 ]] || { echo "[ERROR] At least one test name must be specified." >&2; return 1; }
-  local vdc_release_id=$(vdc_release_id)
-  mkdir -p ${report_dir}/${vdc_release_id}
-  echo "test: started"
-  local state="done"
-  local summary=
-  local t=
-  for t in $*; do
-    local s="success"
-    set +e
-    run_test ${t}
-    [[ $? -eq 0 ]] || {
-      s="failure"
-      state="failed"
-    }
-    set -e
-    summary="${summary}${t}: ${s}\n"
-    [[ -x "${abs_dirname}/test.${t}/report" ]] && {
-      sleep 3
-      run_report ${t} ${s}
-    }
-  done
-  echo -e ${summary} > ${report_dir}/${vdc_release_id}/summary.md
-  local message="test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
-  [[ ${run_mode} = jenkins ]] && [[ -n ${JENKINS_URL} ]] && { message="${message} report: ${JENKINS_URL}${report_url_prefix}/${vdc_release_id}/"; } || :
-  echo "test: ${state}"
-}
-
-function run_test(){
-  local name=${1}
-  [[ -x "${abs_dirname}/test.${name}/test" ]] || { echo "[ERROR] Test not found: ${abs_dirname}/test.${name}/test" >&2; return 1; }
-  echo "testing ${abs_dirname}/test.${name}/test"
-  local timeout_for_this_test=$(eval echo '$TEST_TIMEOUT_'$(uppercase ${name}))
-  timeout ${timeout_for_this_test:-${test_timeout}} ${abs_dirname}/test.${name}/test
-  return $?
-}
-
-function run_report(){
-  local name=${1}
-  [[ -x "${abs_dirname}/test.${name}/report" ]] || { echo "[ERROR] Report not found: ${abs_dirname}/test.${name}/report" >&2; return 1; }
-  local test_status=${2}
-  echo "reporting ${abs_dirname}/test.${name}/report"
-  ${abs_dirname}/test.${name}/report ${test_status}
-}
-
 function vmapp_getopts_adaptor(){
   local arg1=$1 # suite name
   local arg2=$2 # to deploy directory
@@ -381,9 +335,6 @@ rpmbuild)
     rpmbuild
     ;;
   esac
-  ;;
-test)
-  run_tests $*
   ;;
 vmapp)
   vmapp_getopts_adaptor $*
