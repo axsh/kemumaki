@@ -1,5 +1,0 @@
-[wakame-vdc-rhel6]
-name=Wakame-VDC
-baseurl=http://vdc-yum-repo-server/axsh/wakame/master/current
-enabled=1
-gpgcheck=0

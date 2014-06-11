@@ -12,6 +12,3 @@ Quick Start
     $
     $ # run rpmbuild
     $ sudo bin/kemumaki rpmbuild
-    $
-    $ # run setup
-    $ sudo bin/kemumaki setup

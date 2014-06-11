@@ -59,13 +59,6 @@ function rpmbuild(){
   echo "rpmbuild: done"
 }
 
-function setup(){
-  local setup_dir=${abs_dirname}/setup.${KEMUMAKI_ENV}
-  [[ -d ${setup_dir} ]] || setup_dir=${abs_dirname}/setup
-  echo "setup: ${KEMUMAKI_ENV:-default}"
-  ${setup_dir}/setup.sh $*
-}
-
 function run_tests(){
   [[ $# -ge 1 ]] || { echo "[ERROR] At least one test name must be specified." >&2; return 1; }
   local vdc_release_id=$(vdc_release_id)
@@ -388,9 +381,6 @@ rpmbuild)
     rpmbuild
     ;;
   esac
-  ;;
-setup)
-  setup $*
   ;;
 test)
   run_tests $*
