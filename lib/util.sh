@@ -21,11 +21,3 @@ function vdc_release_id(){
 function vdc_origin_url(){
   (cd ${vdc_dir} && git config --get remote.origin.url)
 }
-
-function uppercase(){
-  echo $1 | tr '[:lower:]' '[:upper:]'
-}
-
-function lowercase(){
-  echo $1 | tr '[:upper:]' '[:lower:]'
-}
