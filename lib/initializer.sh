@@ -40,8 +40,6 @@ function initialize(){
   vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
   vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-all}}
 
-  test_timeout=${TEST_TIMEOUT:-${test_timeout:-$((60 * 30))}}
-
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${report_dir}
