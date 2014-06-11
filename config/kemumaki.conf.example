@@ -17,9 +17,6 @@ vdc_repo_url=git://github.com/axsh/wakame-vdc.git
 vdc_branch=master
 vdc_yum_repo_host=192.168.2.50
 
-#ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ssh_opts="-o StrictHostKeyChecking=no"
-
 report_dir=/var/www/html/reports
 report_url_prefix=reports
 
