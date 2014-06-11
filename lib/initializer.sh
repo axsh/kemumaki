@@ -39,12 +39,6 @@ function initialize(){
   kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
   kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
   
-  # hipchat
-  hipchat_notification=${HIPCHAT_NOTIFICATION:-${hipchat_notification:-false}}
-  hipchat_token=${HIPCHAT_TOKEN:-${hipchat_token:-}}
-  hipchat_room_id=${HIPCHAT_ROOM_ID:-${hipchat_room_id:-}}
-  hipchat_from_name=${HIPCHAT_FROM_NAME:-${hipchat_from_name:-}}
-  
   # vdc
   vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.git}}
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}

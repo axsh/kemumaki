@@ -49,28 +49,13 @@ function prepare(){
   fi
 }
 
-function notify(){
-  [[ "${hipchat_notification}" = true ]] || return 0
-  local message=$1
-  # add jenkins build url
-  [[ -z ${BUILD_URL} ]] || message="${BUILD_URL} ${message}"
-  echo -e "${message} " | ${lib_dir}/hipchat_room_message -t ${hipchat_token} -r ${hipchat_room_id} -f ${hipchat_from_name}
-}
-
-function notify_rpmbuild(){
-  local state=${1:-unknown}
-  notify "rpmbuild: ${state}> ${vdc_branch} of ${vdc_repo_url} ($(vdc_release_id))"
-}
-
 function rpmbuild(){
   echo "rpmbuild: started"
   [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
-  notify_rpmbuild started
-  trap "notify_rpmbuild failed && exit 1" ERR
+  trap "exit 1" ERR
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
   trap - ERR
-  notify_rpmbuild done
   echo "rpmbuild: done"
 }
 
@@ -86,7 +71,6 @@ function run_tests(){
   local vdc_release_id=$(vdc_release_id)
   mkdir -p ${report_dir}/${vdc_release_id}
   echo "test: started"
-  notify "test: started> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
   local state="done"
   local summary=
   local t=
@@ -108,7 +92,6 @@ function run_tests(){
   echo -e ${summary} > ${report_dir}/${vdc_release_id}/summary.md
   local message="test: ${state}> ${vdc_branch} of ${vdc_repo_url} (${vdc_release_id})"
   [[ ${run_mode} = jenkins ]] && [[ -n ${JENKINS_URL} ]] && { message="${message} report: ${JENKINS_URL}${report_url_prefix}/${vdc_release_id}/"; } || :
-  notify "${message}"
   echo "test: ${state}"
 }
 

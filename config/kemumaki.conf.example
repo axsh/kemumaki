@@ -26,11 +26,6 @@ vdc_repo_url=git://github.com/axsh/wakame-vdc.git
 vdc_branch=master
 vdc_yum_repo_host=192.168.2.50
 
-hipchat_notification=false
-hipchat_token=
-hipchat_room_id=
-hipchat_from_name=kemumaki
-
 #ssh_opts="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ssh_opts="-o StrictHostKeyChecking=no"
 
