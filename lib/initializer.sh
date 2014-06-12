@@ -12,7 +12,6 @@ function initialize(){
   abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
   lib_dir=${abs_dirname}/lib
   config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-  . ${lib_dir}/util.sh
   load_config
   set_debug
 

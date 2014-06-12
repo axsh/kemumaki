@@ -10,12 +10,12 @@ function checkroot() {
   } || :
 }
 
-function update_vdc(){
-  sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
+function vdc_origin_url(){
+  (cd ${vdc_dir} && git config --get remote.origin.url)
 }
 
-function update_kemumaki(){
-  sync_repo ${kemumaki_repo_url} ${kemumaki_branch} ${abs_dirname}
+function update_vdc(){
+  sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
 }
 
 function sync_repo(){
@@ -59,8 +59,6 @@ LC_ALL=C
 set -e
 set -o pipefail
 
-exec > >(tee kemumaki.log) 2>&1
-
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 [[ -n $1 ]] && {
@@ -73,24 +71,8 @@ exec > >(tee kemumaki.log) 2>&1
 prepare
 
 case ${command} in
-update)
-  update_kemumaki
-  exit 0
-  ;;
 rpmbuild)
-  case $1 in
-  clean)
-    rm -rf ${rpmbuild_tmp_dir}
-    exit 0
-    ;;
-  *)
-    [[ -n $1 ]] && {
-      vdc_build_target=$1
-      shift
-    }
-    rpmbuild
-    ;;
-  esac
+  rpmbuild
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
