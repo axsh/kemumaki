@@ -14,10 +14,6 @@ function update_vdc(){
   sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
 }
 
-function update_kemumaki(){
-  sync_repo ${kemumaki_repo_url} ${kemumaki_branch} ${abs_dirname}
-}
-
 function sync_repo(){
   local repo_url=$1
   local target=$2
@@ -73,10 +69,6 @@ exec > >(tee kemumaki.log) 2>&1
 prepare
 
 case ${command} in
-update)
-  update_kemumaki
-  exit 0
-  ;;
 rpmbuild)
   rpmbuild
   ;;
