@@ -30,11 +30,7 @@ function sync_repo(){
 }
 
 function prepare(){
-  case "${run_mode}" in
-    jenkins)
-      vdc_repo_url=$(vdc_origin_url)
-      ;;
-  esac
+  vdc_repo_url=$(vdc_origin_url)
 }
 
 function rpmbuild(){
