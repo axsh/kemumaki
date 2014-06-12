@@ -39,7 +39,7 @@ function initialize(){
   kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
 
   # vdc
-  vdc_repo_url=${VDC_REPO_URL:-${vdc_repo_url:-https://github.com/axsh/wakame-vdc.git}}
+  vdc_repo_url=$(vdc_origin_url)
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
   vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
   vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
@@ -54,8 +54,6 @@ LC_ALL=C
 initialize
 
 command=${1:-""}
-
-vdc_repo_url=$(vdc_origin_url)
 
 case "${command}" in
   rpmbuild)
