@@ -30,23 +30,11 @@ function sync_repo(){
 }
 
 function prepare(){
-  case "${run_mode}" in
-    standalone)
-      [[ -d ${vdc_dir} ]] || {
-        (
-          cd $(dirname ${vdc_dir})
-          git clone ${vdc_repo_url} $(basename ${vdc_dir})
-        )
-      }
-      ;;
-    jenkins)
-      vdc_repo_url=$(vdc_origin_url)
-      ;;
-  esac
+  vdc_repo_url=$(vdc_origin_url)
 }
 
 function rpmbuild(){
-  [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
+  [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
 }
@@ -69,8 +57,6 @@ function initialize(){
   vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-
-  run_mode=${run_mode:-jenkins}
 
   # kemumaki
   kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
