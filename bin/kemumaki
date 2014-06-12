@@ -1,15 +1,5 @@
 #!/bin/bash
 
-function checkroot() {
-  #
-  # Check if we're running as root, and bail out if we're not.
-  #
-  [[ "${UID}" -ne 0 ]] && {
-    echo "[ERROR] Must run as root." >&2
-    return 1
-  } || :
-}
-
 function vdc_origin_url(){
   (cd ${vdc_dir} && git config --get remote.origin.url)
 }
@@ -29,7 +19,9 @@ function sync_repo(){
     revision=$(git ls-remote ${repo_url} ${target} | egrep "[0-9a-f]{40}[[:space:]]+refs/.*?/${target}" | cut -c1-40)
   }
 
-  git fetch origin && git fetch --tags origin && git reset --hard ${revision}
+  git fetch origin
+  git fetch --tags origin
+  git reset --hard ${revision}
   git submodule update --init
 }
 
@@ -64,13 +56,9 @@ function initialize(){
   load_config
   set_debug
 
-  kemumaki_env=${KEMUMAKI_ENV:-shinjuku}
   vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-  report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-/var/www/html/reports}}
-  report_dir=${report_dir%/} # remove trailing slash
-  report_url_prefix=${KEMUMAKI_REPORT_URL_PREFIX:-${report_url_prefix:-reports}}
 
   run_mode=${run_mode:-jenkins}
 
@@ -86,7 +74,6 @@ function initialize(){
 
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
-  mkdir -p ${report_dir}
 }
 
 LANG=C
