@@ -70,7 +70,7 @@ function initialize(){
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
 
-  run_mode=${run_mode:-jenkins}
+  run_mode=jenkins
 
   # kemumaki
   kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
