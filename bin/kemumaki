@@ -34,9 +34,7 @@ LC_ALL=C
 
 initialize
 
-command=${1:-""}
-
-case "${command}" in
+case "${1:-""}" in
   rpmbuild)
     rpmbuild
     ;;
