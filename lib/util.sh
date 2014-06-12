@@ -10,10 +10,6 @@ function checkroot() {
   } || :
 }
 
-function vdc_release_id(){
-  (cd ${vdc_dir} && ./rpmbuild/helpers/gen-release-id.sh)
-}
-
 function vdc_origin_url(){
   (cd ${vdc_dir} && git config --get remote.origin.url)
 }
