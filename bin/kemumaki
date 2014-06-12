@@ -66,8 +66,6 @@ set -o pipefail
   shift
 }
 
-[[ "${command}" = update ]] || checkroot
-
 prepare
 
 case ${command} in
