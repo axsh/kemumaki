@@ -59,8 +59,6 @@ LC_ALL=C
 set -e
 set -o pipefail
 
-exec > >(tee kemumaki.log) 2>&1
-
 . $(dirname ${BASH_SOURCE[0]})/../lib/initializer.sh
 
 [[ -n $1 ]] && {
