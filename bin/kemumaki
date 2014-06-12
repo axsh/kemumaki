@@ -7,37 +7,26 @@ set -e
 set -o pipefail
 set -x
 
-function rpmbuild(){
-  cd ${lib_dir}
-  ./spot-build.sh ${vdc_dir} ${vdc_branch}
-}
-
-function initialize(){
-  abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
-  lib_dir=${abs_dirname}/lib
-
-  vdc_build_target=${vdc_build_target:-}
-  tmp_dir=${abs_dirname}/tmp
-  rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-
-  # vdc
-  vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
-  vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
-  vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
-
-  mkdir -p ${tmp_dir}
-  mkdir -p ${rpmbuild_tmp_dir}
-}
-
 LANG=C
 LC_ALL=C
 
-initialize
+abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
+lib_dir=${abs_dirname}/lib
 
-command=${1:-""}
+tmp_dir=${abs_dirname}/tmp
+rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
 
-case "${command}" in
+# vdc
+vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
+vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
+vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
+
+mkdir -p ${tmp_dir}
+mkdir -p ${rpmbuild_tmp_dir}
+
+case "${1:-""}" in
   rpmbuild)
-    rpmbuild
+    cd ${lib_dir}
+    ./spot-build.sh ${vdc_dir} ${vdc_branch}
     ;;
 esac
