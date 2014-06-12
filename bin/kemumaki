@@ -41,8 +41,4 @@ case "${command}" in
   rpmbuild)
     rpmbuild
     ;;
-  *)
-    echo "[ERROR] no such command: ${command}" >&2
-    exit 1
-    ;;
 esac
