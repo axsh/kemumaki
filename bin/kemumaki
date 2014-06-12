@@ -11,10 +11,6 @@ function rpmbuild(){
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
 }
 
-function load_config(){
-  [[ ! -f ${config_dir}/kemumaki.conf ]] || . ${config_dir}/kemumaki.conf
-}
-
 function set_debug(){
   [[ ${KEMUMAKI_DEBUG:-${debug}} = true ]] && set -x || :
 }
@@ -23,7 +19,6 @@ function initialize(){
   abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
   lib_dir=${abs_dirname}/lib
   config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-  load_config
   set_debug
 
   vdc_build_target=${vdc_build_target:-}
