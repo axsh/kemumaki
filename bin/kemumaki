@@ -30,13 +30,16 @@ function sync_repo(){
 }
 
 function prepare(){
-  if [[ "${run_mode}" = standalone ]]; then
-    [[ -d ${vdc_dir} ]] || {
-      ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir}) )
-    }
-  elif [[ "${run_mode}" = jenkins ]]; then
-    vdc_repo_url=$(vdc_origin_url)
-  fi
+  case "${run_mode}" in
+    standalone)
+      [[ -d ${vdc_dir} ]] || {
+        ( cd $(dirname ${vdc_dir}) && git clone ${vdc_repo_url} $(basename ${vdc_dir}) )
+      }
+      ;;
+    jenkins)
+      vdc_repo_url=$(vdc_origin_url)
+      ;;
+  esac
 }
 
 function rpmbuild(){
