@@ -78,19 +78,7 @@ update)
   exit 0
   ;;
 rpmbuild)
-  case $1 in
-  clean)
-    rm -rf ${rpmbuild_tmp_dir}
-    exit 0
-    ;;
-  *)
-    [[ -n $1 ]] && {
-      vdc_build_target=$1
-      shift
-    }
-    rpmbuild
-    ;;
-  esac
+  rpmbuild
   ;;
 *)
   echo "[ERROR] no such command: ${command}"
