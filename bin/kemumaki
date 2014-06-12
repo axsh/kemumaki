@@ -10,10 +10,6 @@ function vdc_origin_url(){
   (cd ${vdc_dir} && git config --get remote.origin.url)
 }
 
-function prepare(){
-  vdc_repo_url=$(vdc_origin_url)
-}
-
 function rpmbuild(){
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
@@ -59,7 +55,7 @@ initialize
 
 command=${1:-""}
 
-prepare
+vdc_repo_url=$(vdc_origin_url)
 
 case "${command}" in
   rpmbuild)
