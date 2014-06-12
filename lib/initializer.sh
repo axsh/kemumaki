@@ -36,10 +36,6 @@ function initialize(){
   vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
   vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
 
-  # vmapp
-  vmapp_deploy_dir=${VMAPP_DEPLOY_DIR:-${vmapp_deploy_dir:-/var/www/html/axsh/wakame}}
-  vmapp_suite=${VMAPP_DEPLOY_DIR:-${vmapp_suite:-all}}
-
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
   mkdir -p ${report_dir}
