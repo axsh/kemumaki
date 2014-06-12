@@ -64,13 +64,9 @@ function initialize(){
   load_config
   set_debug
 
-  kemumaki_env=${KEMUMAKI_ENV:-shinjuku}
   vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-  report_dir=${KEMUMAKI_REPORT_DIR:-${report_dir:-/var/www/html/reports}}
-  report_dir=${report_dir%/} # remove trailing slash
-  report_url_prefix=${KEMUMAKI_REPORT_URL_PREFIX:-${report_url_prefix:-reports}}
 
   run_mode=${run_mode:-jenkins}
 
@@ -86,7 +82,6 @@ function initialize(){
 
   mkdir -p ${tmp_dir}
   mkdir -p ${rpmbuild_tmp_dir}
-  mkdir -p ${report_dir}
 }
 
 LANG=C

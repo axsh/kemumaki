@@ -1,8 +1,6 @@
 LANG=C
 LC_ALL=C
 
-export KEMUMAKI_ENV=shinjuku
-
 # standalone: don't update kemumaki. update vdc
 # jenkins: update kemumaki. don't update vdc unless VDC_BUILD_TARGET is specified
 run_mode=standalone
@@ -15,6 +13,3 @@ kemumaki_branch=master
 
 vdc_repo_url=git://github.com/axsh/wakame-vdc.git
 vdc_branch=master
-
-report_dir=/var/www/html/reports
-report_url_prefix=reports
