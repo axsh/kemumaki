@@ -95,12 +95,12 @@ initialize
 
 prepare
 
-case ${command} in
-rpmbuild)
-  rpmbuild
-  ;;
-*)
-  echo "[ERROR] no such command: ${command}"
-  exit 1
-  ;;
+case $"{command}" in
+  rpmbuild)
+    rpmbuild
+    ;;
+  *)
+    echo "[ERROR] no such command: ${command}"
+    exit 1
+    ;;
 esac
