@@ -29,7 +29,9 @@ function sync_repo(){
     revision=$(git ls-remote ${repo_url} ${target} | egrep "[0-9a-f]{40}[[:space:]]+refs/.*?/${target}" | cut -c1-40)
   }
 
-  git fetch origin && git fetch --tags origin && git reset --hard ${revision}
+  git fetch origin
+  git fetch --tags origin
+  git reset --hard ${revision}
   git submodule update --init
 }
 
