@@ -9,9 +9,7 @@ function update_vdc(){
 }
 
 function sync_repo(){
-  local repo_url=$1
-  local target=$2
-  local destination=$3
+  local repo_url=${1} target=${2} destination=${3}
   [[ $# -eq 3 ]] || { echo "[ERROR] Wrong number of arguments $# for 3" >&2; return 1; }
   local revision=${target}
   cd ${destination}
@@ -84,7 +82,7 @@ set -o pipefail
 
 initialize
 
-[[ -n $1 ]] && {
+[[ -n ${1} ]] && {
   command=${1}
   shift
 }
