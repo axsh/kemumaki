@@ -5,21 +5,17 @@
 #
 set -e
 set -o pipefail
+set -x
 
 function rpmbuild(){
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
 }
 
-function set_debug(){
-  [[ ${KEMUMAKI_DEBUG:-${debug}} = true ]] && set -x || :
-}
-
 function initialize(){
   abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
   lib_dir=${abs_dirname}/lib
   config_dir=${KEMUMAKI_CONFIG_DIR:-${abs_dirname}/config}
-  set_debug
 
   vdc_build_target=${vdc_build_target:-}
   tmp_dir=${abs_dirname}/tmp
