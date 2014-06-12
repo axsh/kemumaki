@@ -34,7 +34,7 @@ function prepare(){
 }
 
 function rpmbuild(){
-  [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
+  [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
 }
