@@ -7,11 +7,6 @@ set -e
 set -o pipefail
 set -x
 
-function rpmbuild(){
-  cd ${lib_dir}
-  ./spot-build.sh ${vdc_dir} ${vdc_branch}
-}
-
 function initialize(){
   abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
   lib_dir=${abs_dirname}/lib
@@ -36,6 +31,7 @@ initialize
 
 case "${1:-""}" in
   rpmbuild)
-    rpmbuild
+    cd ${lib_dir}
+    ./spot-build.sh ${vdc_dir} ${vdc_branch}
     ;;
 esac
