@@ -31,14 +31,6 @@ function sync_repo(){
 
 function prepare(){
   case "${run_mode}" in
-    standalone)
-      [[ -d ${vdc_dir} ]] || {
-        (
-          cd $(dirname ${vdc_dir})
-          git clone ${vdc_repo_url} $(basename ${vdc_dir})
-        )
-      }
-      ;;
     jenkins)
       vdc_repo_url=$(vdc_origin_url)
       ;;
