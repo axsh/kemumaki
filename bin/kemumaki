@@ -44,11 +44,9 @@ function prepare(){
 }
 
 function rpmbuild(){
-  echo "rpmbuild: started"
   [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
-  echo "rpmbuild: done"
 }
 
 LANG=C
