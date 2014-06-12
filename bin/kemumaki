@@ -10,31 +10,11 @@ function vdc_origin_url(){
   (cd ${vdc_dir} && git config --get remote.origin.url)
 }
 
-function update_vdc(){
-  sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
-}
-
-function sync_repo(){
-  local repo_url=${1} target=${2} destination=${3}
-  [[ $# -eq 3 ]] || { echo "[ERROR] Wrong number of arguments $# for 3" >&2; return 1; }
-  local revision=${target}
-  cd ${destination}
-  [[ "${target}" =~ ^[0-9a-f]{40}$ ]] || {
-    revision=$(git ls-remote ${repo_url} ${target} | egrep "[0-9a-f]{40}[[:space:]]+refs/.*?/${target}" | cut -c1-40)
-  }
-
-  git fetch origin
-  git fetch --tags origin
-  git reset --hard ${revision}
-  git submodule update --init
-}
-
 function prepare(){
   vdc_repo_url=$(vdc_origin_url)
 }
 
 function rpmbuild(){
-  [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
 }
@@ -54,7 +34,7 @@ function initialize(){
   load_config
   set_debug
 
-  vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
+  vdc_build_target=${vdc_build_target:-}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
 
