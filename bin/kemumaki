@@ -30,10 +30,6 @@ function initialize(){
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
 
-  # kemumaki
-  kemumaki_repo_url=${kemumaki_repo_url:-https://github.com/axsh/kemumaki.git}
-  kemumaki_branch=${KEMUMAKI_BRANCH:-${kemumaki_branch:-master}}
-
   # vdc
   vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
   vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
