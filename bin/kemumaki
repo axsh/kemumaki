@@ -53,7 +53,7 @@ function initialize(){
   load_config
   set_debug
 
-  vdc_build_target=${VDC_BUILD_TARGET:-${vdc_build_target:-}}
+  vdc_build_target=${vdc_build_target:-}
   tmp_dir=${abs_dirname}/tmp
   rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
 
