@@ -13,16 +13,10 @@ LC_ALL=C
 abs_dirname=$(cd $(dirname ${BASH_SOURCE[0]})/../ && pwd)
 lib_dir=${abs_dirname}/lib
 
-tmp_dir=${abs_dirname}/tmp
-rpmbuild_tmp_dir=${tmp_dir}/rpmbuild
-
 # vdc
 vdc_branch=${GIT_BRANCH:-${vdc_branch:-master}}
 vdc_branch=${vdc_branch##*/} # remote/feathre-foo -> feature-foo
 vdc_dir=${VDC_DIR:-${WORKSPACE:-${vdc_dir:-${abs_dirname}/wakame-vdc}}}
-
-mkdir -p ${tmp_dir}
-mkdir -p ${rpmbuild_tmp_dir}
 
 case "${1:-""}" in
   rpmbuild)
