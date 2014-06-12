@@ -46,10 +46,8 @@ function prepare(){
 function rpmbuild(){
   echo "rpmbuild: started"
   [[ "${run_mode}" = jenkins ]] && [[ -z ${VDC_BUILD_TARGET} ]] || update_vdc
-  trap "exit 1" ERR
   cd ${lib_dir}
   ./spot-build.sh ${vdc_dir} ${vdc_branch}
-  trap - ERR
   echo "rpmbuild: done"
 }
 
