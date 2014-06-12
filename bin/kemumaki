@@ -10,6 +10,10 @@ function checkroot() {
   } || :
 }
 
+function vdc_origin_url(){
+  (cd ${vdc_dir} && git config --get remote.origin.url)
+}
+
 function update_vdc(){
   sync_repo ${vdc_repo_url} ${vdc_build_target:-${vdc_branch}} ${vdc_dir}
 }
