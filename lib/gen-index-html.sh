@@ -1,5 +1,8 @@
 #!/bin/bash
-
+#
+# requires:
+#  bash
+#
 set -e
 
 . $(cd $(dirname ${BASH_SOURCE[0]}) && pwd)/../config/rpmbuild.conf
