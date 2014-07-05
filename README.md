@@ -1,14 +1,25 @@
 Kemumaki
 ========
 
-Kemumaki is a smoke testing framework for Wakame-VDC.
+Kemumaki is a rpmbuild tool for Wakame-vdc
 
-Quick Start
------------
+Features
+--------
 
-    $ # configure global settings
-    $ cp config/kemumaki.conf.example config/kemumaki.conf
-    $ vi config/kemumaki.conf
-    $
-    $ # run rpmbuild
-    $ sudo bin/kemumaki rpmbuild
+1. build an environment using chroot from scratch
+2. build rpm packages
+3. create a local yum repository
+
+Getting Started
+---------------
+
+```
+$ git submodule update --init --recursive
+$ sudo bin/kemumaki rpmbuild
+```
+
+Links
+-----
+
++ [wakame-vdc/rpmbuild](https://github.com/axsh/wakame-vdc/tree/master/rpmbuild)
++ [vmbuilder](https://github.com/axsh/vmbuilder)
