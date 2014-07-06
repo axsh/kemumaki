@@ -66,13 +66,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
     list_3rd_party | while read pkg_name pkg_uri; do
       pkg_file=$(basename \${pkg_uri})
       echo downloading \${pkg_name} ...
-      case ${pkg_uri} in
-      'http://*')
-        [ -f \${vendor_dir}/\${pkg_file} ] || {
-          curl -R \${pkg_uri} -o \${vendor_dir}/\${pkg_file}
-        }
-        ;;
-      esac
+      curl -R \${pkg_uri} -o \${vendor_dir}/\${pkg_file}
     done
   }
 
