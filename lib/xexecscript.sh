@@ -48,13 +48,12 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   function list_3rd_party() {
     cat <<-EOS | egrep -v ^#
-	# pkg_name                pkg_uri
-	elrepo-release            http://elrepo.org/elrepo-release-6-5.el6.elrepo.noarch.rpm
-	rabbitmq-server-2.7.1     http://www.rabbitmq.com/releases/rabbitmq-server/v2.7.1/rabbitmq-server-2.7.1-1.noarch.rpm
-	openvswitch               http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/kmod-openvswitch-1.6.1-1.el6.${arch}.rpm
-	openvswitch               http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/openvswitch-1.6.1-1.${arch}.rpm
-	lxc                       http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/lxc-libs-0.8.0-1.el6.${arch}.rpm
-	lxc                       http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/lxc-0.8.0-1.el6.${arch}.rpm
+	http://elrepo.org/elrepo-release-6-5.el6.elrepo.noarch.rpm
+	http://www.rabbitmq.com/releases/rabbitmq-server/v2.7.1/rabbitmq-server-2.7.1-1.noarch.rpm
+	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/kmod-openvswitch-1.6.1-1.el6.${arch}.rpm
+	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/openvswitch-1.6.1-1.${arch}.rpm
+	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/lxc-libs-0.8.0-1.el6.${arch}.rpm
+	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/lxc-0.8.0-1.el6.${arch}.rpm
 	EOS
   }
 
@@ -62,10 +61,8 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
     vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
     mkdir -p \${vendor_dir}
 
-    list_3rd_party | while read pkg_name pkg_uri; do
-      pkg_file=\${pkg_uri##*/}
-      echo downloading \${pkg_name} ...
-      curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_file}
+    list_3rd_party | while read pkg_uri; do
+      curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_uri##*/}
     done
   }
 
