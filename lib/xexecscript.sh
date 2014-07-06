@@ -46,9 +46,8 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   # download lxc, rabbitmq-server and openvswitch
   ###>>> ./tests/vdc.sh.d/rhel/3rd-party.sh download
 
-  vendor_dir=tests/vdc.sh.d/rhel/vendor/
-  vendor_dir=${vendor_dir}/${basearch}
-  [ -d ${vendor_dir} ] || mkdir -p ${vendor_dir}
+  vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
+  mkdir -p \${vendor_dir}
 
   function list_3rd_party() {
     vdc_current_base_url=http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}
@@ -65,12 +64,12 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   function download_3rd_party() {
     list_3rd_party | while read pkg_name pkg_uri; do
-      pkg_file=$(basename ${pkg_uri})
-      echo downloading ${pkg_name} ...
+      pkg_file=$(basename \${pkg_uri})
+      echo downloading \${pkg_name} ...
       case ${pkg_uri} in
-      http://*)
-        [ -f ${vendor_dir}/${pkg_file} ] || {
-          curl -R ${pkg_uri} -o ${vendor_dir}/${pkg_file}
+      'http://*')
+        [ -f \${vendor_dir}/\${pkg_file} ] || {
+          curl -R \${pkg_uri} -o \${vendor_dir}/\${pkg_file}
         }
         ;;
       esac
