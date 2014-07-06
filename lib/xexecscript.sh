@@ -63,8 +63,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
     mkdir -p \${vendor_dir}
 
     list_3rd_party | while read pkg_name pkg_uri; do
-      pkg_file=\${pkg_uri##*/}
-      curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_file}
+      curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_uri##*/}
     done
   }
 
