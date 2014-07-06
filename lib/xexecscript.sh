@@ -46,9 +46,6 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   # download lxc, rabbitmq-server and openvswitch
   ###>>> ./tests/vdc.sh.d/rhel/3rd-party.sh download
 
-  vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
-  mkdir -p \${vendor_dir}
-
   function list_3rd_party() {
     cat <<-EOS | egrep -v ^#
 	# pkg_name                pkg_uri
@@ -62,6 +59,9 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   }
 
   function download_3rd_party() {
+    vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
+    mkdir -p \${vendor_dir}
+
     list_3rd_party | while read pkg_name pkg_uri; do
       pkg_file=$(basename \${pkg_uri})
       echo downloading \${pkg_name} ...
