@@ -25,6 +25,8 @@ sed -i s,\$releasever,${distro_ver},g ${chroot_dir}/etc/yum.repos.d/CentOS-Base.
 cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
+  yum clean metadata --disablerepo='*' --enablerepo='base'
+
   echo nameserver 8.8.8.8 >> /etc/resolv.conf
   echo nameserver 8.8.4.4 >> /etc/resolv.conf
 
