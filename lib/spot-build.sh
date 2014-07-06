@@ -34,6 +34,12 @@ for arch in ${archs}; do
 
     rootfs_dir=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}
 
+    case "${arch}" in
+        i686) baseurl=http://centos.data-hotel.net/pub/linux/centos/${distro_ver}/os/i386/   ;;
+      x86_64) baseurl=http://centos.data-hotel.net/pub/linux/centos/${distro_ver}/os/x86_64/ ;;
+           *) ;;
+    esac
+
     time setarch ${arch} \
      ${abs_dirname}/vmbuilder/kvm/rhel/6/vmbuilder.sh \
      --swapsize=0 \
@@ -42,7 +48,9 @@ for arch in ${archs}; do
      --distro-name=${distro_name} \
      --distro-ver=${distro_ver}   \
      --distro-dir=/var/tmp/vmbuilder/${distro_name}-${distro_ver}_${distro_arch} \
-     --rootfs_dir=${rootfs_dir} --diskless
+     --baseurl=${baseurl} \
+     --rootfs-dir=${rootfs_dir} \
+     --diskless
 
     # make sure to remove working directory
     [[ -d ${rootfs_dir} ]] && rm -r ${rootfs_dir}
