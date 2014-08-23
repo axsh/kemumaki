@@ -60,9 +60,9 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
     vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
     mkdir -p \${vendor_dir}
 
-    list_3rd_party | while read pkg_uri; do
+    while read pkg_uri; do
       curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_uri##*/}
-    done
+    done < <(list_3rd_party)
   }
 
   download_3rd_party
