@@ -10,7 +10,7 @@ declare chroot_dir=$1
 [[ -n "${local_repo_path}" ]] || exit 1
 [[ -n "${rpm_dir}"         ]] || exit 1
 
-[[ -d ${chroot_dir}/${local_repo_path} ]] || mkdir -p ${chroot_dir}/${local_repo_path}
+mkdir -p ${chroot_dir}/${local_repo_path}
 rsync -avx ${local_repo_path}/ ${chroot_dir}/${local_repo_path}
 
 cat <<-EOS > ${chroot_dir}/etc/yum.repos.d/wakame-vdc.repo
