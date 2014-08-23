@@ -10,24 +10,23 @@ declare chroot_dir=$1
 [[ -n "${local_repo_path}" ]] || exit 1
 [[ -n "${rpm_dir}"         ]] || exit 1
 
-[[ -d ${chroot_dir}/${local_repo_path} ]] || mkdir -p ${chroot_dir}/${local_repo_path}
+mkdir -p ${chroot_dir}/${local_repo_path}
 rsync -avx ${local_repo_path}/ ${chroot_dir}/${local_repo_path}
 
-cat <<EOS > ${chroot_dir}/etc/yum.repos.d/wakame-vdc.repo
-[wakame-3rd-rhel6]
-name=Wakame 3rd Party
-baseurl=http://dlc.wakame.axsh.jp/packages/3rd/rhel/6/master/
-gpgcheck=0
-EOS
+cat <<-EOS | tee ${chroot_dir}/etc/yum.repos.d/wakame-vdc.repo
+	[wakame-3rd-rhel6]
+	name=Wakame 3rd Party
+	baseurl=http://dlc.wakame.axsh.jp/packages/3rd/rhel/6/master/
+	gpgcheck=0
+	EOS
 
-cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 sed -i s,\$releasever,${distro_ver},g ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 
 arch=$(arch)
-case ${arch} in
-  i*86)   basearch=i386; arch=i686;;
-  x86_64) basearch=${arch};;
+case "${arch}" in
+  i*86)   basearch=i386 arch=i686 ;;
+  x86_64) basearch=${arch} ;;
 esac
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
@@ -58,12 +57,13 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   }
 
   function download_3rd_party() {
-    vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
+    local vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
     mkdir -p \${vendor_dir}
 
-    list_3rd_party | while read pkg_uri; do
+    local pkg_uri=
+    while read pkg_uri; do
       curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_uri##*/}
-    done
+    done < <(list_3rd_party)
   }
 
   download_3rd_party
