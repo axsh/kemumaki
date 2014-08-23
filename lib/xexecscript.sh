@@ -24,9 +24,9 @@ sed -i s,\$releasever,${distro_ver},g ${chroot_dir}/etc/yum.repos.d/CentOS-Base.
 cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 
 arch=$(arch)
-case ${arch} in
-  i*86)   basearch=i386; arch=i686;;
-  x86_64) basearch=${arch};;
+case "${arch}" in
+  i*86)   basearch=i386 arch=i686 ;;
+  x86_64) basearch=${arch} ;;
 esac
 
 chroot ${chroot_dir} $SHELL -ex <<EOS
@@ -57,9 +57,10 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   }
 
   function download_3rd_party() {
-    vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
+    local vendor_dir=tests/vdc.sh.d/rhel/vendor/${basearch}
     mkdir -p \${vendor_dir}
 
+    local pkg_uri=
     while read pkg_uri; do
       curl -fsSkL \${pkg_uri} -o \${vendor_dir}/\${pkg_uri##*/}
     done < <(list_3rd_party)
