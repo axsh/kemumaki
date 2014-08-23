@@ -20,7 +20,36 @@ cat <<-EOS | tee ${chroot_dir}/etc/yum.repos.d/wakame-vdc.repo
 	gpgcheck=0
 	EOS
 
-sed -i s,\$releasever,${distro_ver},g ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
+# hold-releasever
+if [[ -n "${distro_ver}" ]]; then
+  mkdir -p             ${chroot_dir}/etc/yum/vars
+
+  echo ${distro_ver} > ${chroot_dir}/etc/yum/vars/releasever
+  cat                  ${chroot_dir}/etc/yum/vars/releasever
+fi
+
+# hold-releasever.hold-baseurl
+if [[ -f ${chroot_dir}/etc/yum/vars/releasever ]]; then
+  releasever=$(< ${chroot_dir}/etc/yum/vars/releasever)
+  majorver=${releasever%%.*}
+
+  mv ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo{,.saved}
+
+  cat <<-REPO > ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
+	[base]
+	name=CentOS-\$releasever - Base
+	baseurl=http://ftp.riken.jp/Linux/centos/\$releasever/os/\$basearch/
+	gpgcheck=1
+	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-${majorver}
+
+	[updates]
+	name=CentOS-\$releasever - Updates
+	baseurl=http://ftp.riken.jp/Linux/centos/\$releasever/updates/\$basearch/
+	gpgcheck=1
+	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-${majorver}
+	REPO
+fi
+
 cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 
 arch=$(arch)
