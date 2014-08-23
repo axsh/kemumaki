@@ -13,14 +13,13 @@ declare chroot_dir=$1
 mkdir -p ${chroot_dir}/${local_repo_path}
 rsync -avx ${local_repo_path}/ ${chroot_dir}/${local_repo_path}
 
-cat <<-EOS > ${chroot_dir}/etc/yum.repos.d/wakame-vdc.repo
+cat <<-EOS | tee ${chroot_dir}/etc/yum.repos.d/wakame-vdc.repo
 	[wakame-3rd-rhel6]
 	name=Wakame 3rd Party
 	baseurl=http://dlc.wakame.axsh.jp/packages/3rd/rhel/6/master/
 	gpgcheck=0
 	EOS
 
-cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 sed -i s,\$releasever,${distro_ver},g ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 cat ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 
