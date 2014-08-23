@@ -29,7 +29,7 @@ for arch in ${archs}; do
 
     # for vmbuilder.sh options
     distro_name=centos
-    distro_ver=6.5
+    distro_ver=6.4
     distro_arch=${arch}
 
     rootfs_dir=${rpmbuild_tmp_dir}/${distro_name}-${distro_ver}_${distro_arch}
