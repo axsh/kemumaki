@@ -28,6 +28,20 @@ if [[ -n "${distro_ver}" ]]; then
   cat                  ${chroot_dir}/etc/yum/vars/releasever
 fi
 
+function baseurl() {
+  local releasever=${1}
+
+  local baseurl=http://vault.centos.org
+
+  case "${releasever}" in
+    5.10 | 6.5 | 7.0.1406 )
+      baseurl=http://ftp.riken.jp/Linux/centos
+      ;;
+  esac
+
+  echo ${baseurl}
+}
+
 # hold-releasever.hold-baseurl
 if [[ -f ${chroot_dir}/etc/yum/vars/releasever ]]; then
   releasever=$(< ${chroot_dir}/etc/yum/vars/releasever)
@@ -35,16 +49,18 @@ if [[ -f ${chroot_dir}/etc/yum/vars/releasever ]]; then
 
   mv ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo{,.saved}
 
+  baseurl=$(baseurl ${releasever})
+
   cat <<-REPO > ${chroot_dir}/etc/yum.repos.d/CentOS-Base.repo
 	[base]
 	name=CentOS-\$releasever - Base
-	baseurl=http://centos.data-hotel.net/pub/linux/centos/\$releasever/os/\$basearch/
+	baseurl=${baseurl}/\$releasever/os/\$basearch/
 	gpgcheck=1
 	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-${majorver}
 
 	[updates]
 	name=CentOS-\$releasever - Updates
-	baseurl=http://centos.data-hotel.net/pub/linux/centos/\$releasever/updates/\$basearch/
+	baseurl=${baseurl}/\$releasever/updates/\$basearch/
 	gpgcheck=1
 	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-${majorver}
 	REPO
