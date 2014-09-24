@@ -18,6 +18,16 @@ $ git submodule update --init --recursive
 $ sudo bin/kemumaki rpmbuild
 ```
 
+Specify the version number
+--------------------------
+
+Define `distro_ver` in `config/distro_ver.conf`.
+
+
+```
+$ echo distro_ver=6.5 > config/distro_ver.conf
+```
+
 Links
 -----
 
