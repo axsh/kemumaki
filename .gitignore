@@ -5,6 +5,7 @@ images/*
 tmp/*
 config/kemumaki.conf
 config/kemumaki.*.conf
+config/distro_ver.conf
 centos-*/*
 
 # rpmbuild
