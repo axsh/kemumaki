@@ -81,6 +81,17 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.4.4 >> /etc/resolv.conf
 
   rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
+  # workaround 2014/10/17
+  #
+  # in order escape below error
+  # > Error: Cannot retrieve metalink for repository: epel. Please verify its path and try again
+  #
+  sed -i \
+   -e 's,^#baseurl,baseurl,' \
+   -e 's,^mirrorlist=,#mirrorlist=,' \
+   -e 's,http://download.fedoraproject.org/pub/epel/,http://ftp.jaist.ac.jp/pub/Linux/Fedora/epel/,' \
+   /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo
+
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
 
   cd /tmp
