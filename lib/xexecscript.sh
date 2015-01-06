@@ -126,6 +126,19 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 
   ###<<< ./tests/vdc.sh.d/rhel/3rd-party.sh download
 
+  case "${releasever}" in
+    6.[0-5])
+      for pkg_name in libyaml libyaml-devel; do
+        rpm -qa \${pkg_name} | egrep -q \${pkg_name} || {
+          yum install -y http://ftp.jaist.ac.jp/pub/Linux/CentOS/6.6/os/${basearch}/Packages/\${pkg_name}-0.1.3-1.4.el6.${arch}.rpm
+        }
+      done
+      ;;
+    *)
+      yum install --disablerepo=updates -y libyaml libyaml-devel
+      ;;
+  esac
+
   yum-builddep -y rpmbuild/SPECS/*.spec
 
   VDC_BUILD_ID=$(cd ${local_repo_path}/../ && git log -n 1 --pretty=format:"%h") VDC_REPO_URI=${local_repo_path} ./rpmbuild/rules binary-snap
