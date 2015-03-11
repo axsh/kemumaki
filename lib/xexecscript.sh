@@ -4,6 +4,7 @@
 #  bash
 #
 set -e
+set -x
 
 declare chroot_dir=$1
 
