@@ -5,6 +5,7 @@
 #   rsync, tar, ls
 #
 set -e
+set -x
 
 . $(cd $(dirname ${BASH_SOURCE[0]}) && pwd)/../config/rpmbuild.conf
 
