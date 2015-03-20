@@ -94,7 +94,6 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
    /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo
 
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
-  yum --disablerepo='*' --enablerepo=base install -y openssl
 EOS
 
 chroot ${chroot_dir} $SHELL -ex <<'EOS'
