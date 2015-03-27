@@ -4,6 +4,7 @@
 #  bash
 #
 set -e
+set -x
 
 . $(cd $(dirname ${BASH_SOURCE[0]}) && pwd)/../config/rpmbuild.conf
 
@@ -16,7 +17,7 @@ release_id=$(
     for i in ${rpm_dir}/${basearch}/wakame*.rpm; do
       [[ -f "${i}" ]] || continue
       file=$(basename $i)
-      prefix=${file%%.el6.*.rpm}
+      prefix=${file%%.el[0-9]*.*.rpm}
       echo ${prefix##*-}
     done
   done | sort -r | uniq | head -1

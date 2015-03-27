@@ -94,7 +94,17 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
    /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo
 
   yum --disablerepo='*' --enablerepo=base install -y git make sudo rpm-build rpmdevtools yum-utils tar
+EOS
 
+chroot ${chroot_dir} $SHELL -ex <<'EOS'
+  deploy_to=/var/tmp/buildbook-rhel7
+  git clone https://github.com/wakameci/buildbook-rhel7.git ${deploy_to}
+
+  cd ${deploy_to}
+  ./run-book.sh openvswitch.vnet
+EOS
+
+chroot ${chroot_dir} $SHELL -ex <<'EOS'
   cd /tmp
   [[ -d wakame-vdc ]] || git clone ${local_repo_path} wakame-vdc
   cd wakame-vdc
