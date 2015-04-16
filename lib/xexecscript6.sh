@@ -99,7 +99,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   [[ -d wakame-vdc ]] || git clone ${local_repo_path} wakame-vdc
   cd wakame-vdc
 
-  # download lxc, rabbitmq-server and openvswitch
+  # download rabbitmq-server and openvswitch
   ###>>> ./tests/vdc.sh.d/rhel/3rd-party.sh download
 
   function list_3rd_party() {
@@ -108,8 +108,6 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
 	http://www.rabbitmq.com.axsh.jp/releases/rabbitmq-server/v2.7.1/rabbitmq-server-2.7.1-1.noarch.rpm
 	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/kmod-openvswitch-1.6.1-1.el6.${arch}.rpm
 	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/openvswitch-1.6.1-1.${arch}.rpm
-	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/lxc-libs-0.8.0-1.el6.${arch}.rpm
-	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/lxc-0.8.0-1.el6.${arch}.rpm
 	EOS
   }
 
