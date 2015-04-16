@@ -35,7 +35,7 @@ function baseurl() {
   local baseurl=http://vault.centos.org
 
   case "${releasever}" in
-    5.11 | 6.6 | 7.0.1406 )
+    5.11 | 6.6 | 7.1.1503 )
       baseurl=http://ftp.riken.jp/Linux/centos
       ;;
   esac
