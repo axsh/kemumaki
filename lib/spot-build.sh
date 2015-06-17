@@ -11,6 +11,7 @@ set -x
 
 vdc_dir=$1
 vdc_branch=${2:-master}
+vdc_version_tag="${3:-"${VDC_VERSION_TAG:-""}"}"
 
 [[ -d "${vdc_dir}" ]] || {
   echo "ERROR: repository not found: ${vdc_dir}" >/dev/stderr
@@ -27,6 +28,7 @@ for arch in ${archs}; do
     # for xexecscript.sh internal parameters
     export local_repo_path=$(cd ${vdc_dir}/.git && pwd)
     export rpm_dir
+    export VDC_VERSION_TAG=${vdc_version_tag}
 
     # for vmbuilder.sh options
     distro_name=centos
