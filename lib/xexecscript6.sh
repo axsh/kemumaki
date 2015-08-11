@@ -81,7 +81,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
   echo nameserver 8.8.8.8 >> /etc/resolv.conf
   echo nameserver 8.8.4.4 >> /etc/resolv.conf
 
-  rpm -Uvh http://dlc.wakame.axsh.jp.s3-website-us-east-1.amazonaws.com/epel-release
+  rpm -Uvh http://ftp.jaist.ac.jp/pub/Linux/Fedora/epel/6/i386/epel-release-6-8.noarch.rpm
   # workaround 2014/10/17
   #
   # in order escape below error
