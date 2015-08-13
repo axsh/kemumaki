@@ -106,8 +106,8 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
     cat <<-EOS | egrep -v ^#
 	http://elrepo.org/elrepo-release-6-5.el6.elrepo.noarch.rpm
 	http://www.rabbitmq.com/releases/rabbitmq-server/v2.7.1/rabbitmq-server-2.7.1-1.noarch.rpm
-	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/kmod-openvswitch-1.6.1-1.el6.${arch}.rpm
-	http://dlc.wakame.axsh.jp.s3.amazonaws.com/packages/rhel/6/current/${basearch}/openvswitch-1.6.1-1.${arch}.rpm
+	http://dlc2.wakame.axsh.jp/packages/rhel/6/current/${basearch}/kmod-openvswitch-1.6.1-1.el6.${arch}.rpm
+	http://dlc2.wakame.axsh.jp/packages/rhel/6/current/${basearch}/openvswitch-1.6.1-1.${arch}.rpm
 	EOS
   }
 
