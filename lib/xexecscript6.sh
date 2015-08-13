@@ -129,7 +129,7 @@ chroot ${chroot_dir} $SHELL -ex <<EOS
     6.[0-5])
       for pkg_name in libyaml libyaml-devel; do
         rpm -qa \${pkg_name} | egrep -q \${pkg_name} || {
-          yum install -y http://ftp.jaist.ac.jp/pub/Linux/CentOS/6.6/os/${basearch}/Packages/\${pkg_name}-0.1.3-1.4.el6.${arch}.rpm
+          yum install -y http://vault.centos.org/6.6/os/${basearch}/Packages/\${pkg_name}-0.1.3-1.4.el6.${arch}.rpm
         }
       done
       ;;
