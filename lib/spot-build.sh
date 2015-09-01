@@ -31,6 +31,8 @@ for arch in ${archs}; do
     export VDC_VERSION_TAG=${vdc_version_tag}
     export VDC_RELEASE_TAG
 
+    env | sort
+
     # for vmbuilder.sh options
     distro_name=centos
     distro_ver=${distro_ver:-6.4} # don't change default value "6.4".
