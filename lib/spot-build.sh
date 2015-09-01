@@ -29,6 +29,7 @@ for arch in ${archs}; do
     export local_repo_path=$(cd ${vdc_dir}/.git && pwd)
     export rpm_dir
     export VDC_VERSION_TAG=${vdc_version_tag}
+    export VDC_RELEASE_TAG
 
     # for vmbuilder.sh options
     distro_name=centos
